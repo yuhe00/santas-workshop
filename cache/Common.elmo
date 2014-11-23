@@ -1,0 +1,24 @@
+Elm.Common = Elm.Common || {};
+Elm.Common.make = function (_elm) {
+   "use strict";
+   _elm.Common = _elm.Common || {};
+   if (_elm.Common.values)
+   return _elm.Common.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Common";
+   var name = function (named) {
+      return named.name;
+   };
+   var Named = F2(function (a,b) {
+      return _U.insert("name",a,b);
+   });
+   _elm.Common.values = {_op: _op
+                        ,Named: Named
+                        ,name: name};
+   return _elm.Common.values;
+};

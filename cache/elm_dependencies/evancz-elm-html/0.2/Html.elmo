@@ -1,0 +1,97 @@
+Elm.Html = Elm.Html || {};
+Elm.Html.make = function (_elm) {
+   "use strict";
+   _elm.Html = _elm.Html || {};
+   if (_elm.Html.values)
+   return _elm.Html.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Html",
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Html = Elm.Native.Html.make(_elm);
+   var getAnything = $Native$Html.getAnything;
+   var KeyboardEvent = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {_: {}
+             ,altKey: b
+             ,ctrlKey: c
+             ,keyCode: a
+             ,metaKey: d
+             ,shiftKey: e};
+   });
+   var getKeyboardEvent = $Native$Html.getKeyboardEvent;
+   var MouseEvent = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {_: {}
+             ,altKey: b
+             ,button: a
+             ,ctrlKey: c
+             ,metaKey: d
+             ,shiftKey: e};
+   });
+   var getMouseEvent = $Native$Html.getMouseEvent;
+   var getValueAndSelection = $Native$Html.getValueAndSelection;
+   var Backward = {ctor: "Backward"};
+   var Forward = {ctor: "Forward"};
+   var getValue = $Native$Html.getValue;
+   var getChecked = $Native$Html.getChecked;
+   var filterMap = $Native$Html.filterMap;
+   var when = F2(function (pred,
+   getter) {
+      return A2($Native$Html.filterMap,
+      function (v) {
+         return pred(v) ? $Maybe.Just(v) : $Maybe.Nothing;
+      },
+      getter);
+   });
+   var on = $Native$Html.on;
+   var Get = {ctor: "Get"};
+   var prop = $Native$Html.pair;
+   var style = $Native$Html.style;
+   var CssProperty = {ctor: "CssProperty"};
+   var toggle = $Native$Html.pair;
+   var attr = $Native$Html.pair;
+   var Attribute = {ctor: "Attribute"};
+   var toElement = $Native$Html.toElement;
+   var text = $Native$Html.text;
+   var node = $Native$Html.node;
+   var Html = {ctor: "Html"};
+   _elm.Html.values = {_op: _op
+                      ,Html: Html
+                      ,node: node
+                      ,text: text
+                      ,toElement: toElement
+                      ,Attribute: Attribute
+                      ,attr: attr
+                      ,toggle: toggle
+                      ,CssProperty: CssProperty
+                      ,style: style
+                      ,prop: prop
+                      ,Get: Get
+                      ,on: on
+                      ,when: when
+                      ,filterMap: filterMap
+                      ,getChecked: getChecked
+                      ,getValue: getValue
+                      ,Forward: Forward
+                      ,Backward: Backward
+                      ,getValueAndSelection: getValueAndSelection
+                      ,getMouseEvent: getMouseEvent
+                      ,MouseEvent: MouseEvent
+                      ,getKeyboardEvent: getKeyboardEvent
+                      ,KeyboardEvent: KeyboardEvent
+                      ,getAnything: getAnything};
+   return _elm.Html.values;
+};

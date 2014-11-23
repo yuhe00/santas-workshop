@@ -1,0 +1,212 @@
+Elm.Producer = Elm.Producer || {};
+Elm.Producer.make = function (_elm) {
+   "use strict";
+   _elm.Producer = _elm.Producer || {};
+   if (_elm.Producer.values)
+   return _elm.Producer.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Producer",
+   $Basics = Elm.Basics.make(_elm),
+   $Common = Elm.Common.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Product = Elm.Product.make(_elm),
+   $Stackable = Elm.Stackable.make(_elm);
+   var deliveries = F2(function (producers,
+   products) {
+      return function () {
+         var wrapped = A2($Stackable.count,
+         $Product.wrapped,
+         products);
+         var step = F2(function (stackableProducer,
+         c) {
+            return function () {
+               switch (stackableProducer.ctor)
+               {case "_Tuple2":
+                  switch (stackableProducer._0.ctor)
+                    {case "Deliverer":
+                       return wrapped - A2($Basics.max,
+                         0,
+                         wrapped - c - stackableProducer._0._0 * stackableProducer._1);}
+                    break;}
+               return c;
+            }();
+         });
+         return A2($List.foldr,
+         step,
+         0)(A2($List.map,
+         function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return {ctor: "_Tuple2"
+                         ,_0: _v4._0.function
+                         ,_1: _v4._1};}
+               _E.Case($moduleName,
+               "on line 78, column 47 to 65");
+            }();
+         },
+         producers));
+      }();
+   });
+   var produce = F2(function (_v8,
+   products) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var _v12 = _v8._0.function;
+                 switch (_v12.ctor)
+                 {case "Creator":
+                    return A3($List.foldr,
+                      F2(function (_v16,ps) {
+                         return function () {
+                            switch (_v16.ctor)
+                            {case "_Tuple2":
+                               return A3($Stackable.update,
+                                 _v16._0,
+                                 _v16._1 * _v8._1,
+                                 ps);}
+                            _E.Case($moduleName,
+                            "on line 60, column 44 to 78");
+                         }();
+                      }),
+                      products,
+                      _v12._0);
+                    case "Transformer":
+                    return function () {
+                         var possible = $List.minimum(A2($List.map,
+                         function (_v20) {
+                            return function () {
+                               switch (_v20.ctor)
+                               {case "_Tuple2":
+                                  return A2($Stackable.count,
+                                    _v20._0,
+                                    products) / _v20._1 | 0;}
+                               _E.Case($moduleName,
+                               "on line 62, column 56 to 88");
+                            }();
+                         },
+                         _v12._0));
+                         var multiplier = A2($Basics.min,
+                         _v8._1,
+                         possible);
+                         var updateConsumers = function (xs) {
+                            return A3($List.foldr,
+                            function (_v24) {
+                               return function () {
+                                  switch (_v24.ctor)
+                                  {case "_Tuple2":
+                                     return A2($Stackable.update,
+                                       _v24._0,
+                                       _v24._1 * multiplier);}
+                                  _E.Case($moduleName,
+                                  "on line 64, column 56 to 90");
+                               }();
+                            },
+                            xs,
+                            _v12._1);
+                         };
+                         var updateProducers = function (xs) {
+                            return A3($List.foldr,
+                            function (_v28) {
+                               return function () {
+                                  switch (_v28.ctor)
+                                  {case "_Tuple2":
+                                     return A2($Stackable.update,
+                                       _v28._0,
+                                       0 - _v28._1 * multiplier);}
+                                  _E.Case($moduleName,
+                                  "on line 65, column 56 to 92");
+                               }();
+                            },
+                            xs,
+                            _v12._0);
+                         };
+                         return updateProducers(updateConsumers(products));
+                      }();}
+                 return products;
+              }();}
+         _E.Case($moduleName,
+         "between lines 59 and 68");
+      }();
+   });
+   var cost = F2(function (purchasableProducer,
+   x) {
+      return A2($List.map,
+      function (_v32) {
+         return function () {
+            switch (_v32.ctor)
+            {case "_Tuple2":
+               return {ctor: "_Tuple2"
+                      ,_0: _v32._0
+                      ,_1: Math.pow(_v32._1 + x,2)};}
+            _E.Case($moduleName,
+            "on line 55, column 22 to 34");
+         }();
+      },
+      purchasableProducer.cost);
+   });
+   var Functionable = F2(function (a,
+   b) {
+      return _U.insert("function",
+      a,
+      b);
+   });
+   var Purchasable = F2(function (a,
+   b) {
+      return _U.insert("cost",a,b);
+   });
+   var Deliverer = function (a) {
+      return {ctor: "Deliverer"
+             ,_0: a};
+   };
+   var reindeer = Functionable(Deliverer(10))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   5,
+   $Product.christmasSpirit)]))($Common.Named("Reindeer")($Basics.identity({_: {}}))));
+   var Transformer = F2(function (a,
+   b) {
+      return {ctor: "Transformer"
+             ,_0: a
+             ,_1: b};
+   });
+   var toyWrapper = Functionable(A2(Transformer,
+   _L.fromArray([A2($Stackable.stack,
+   1,
+   $Product.toy)]),
+   _L.fromArray([A2($Stackable.stack,
+   1,
+   $Product.wrapped)])))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   3,
+   $Product.christmasSpirit)]))($Common.Named("Toy Wrapper")($Basics.identity({_: {}}))));
+   var Creator = function (a) {
+      return {ctor: "Creator"
+             ,_0: a};
+   };
+   var santasLittleHelper = Functionable(Creator(_L.fromArray([A2($Stackable.stack,
+   1,
+   $Product.toy)])))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   1,
+   $Product.christmasSpirit)]))($Common.Named("Santa\'s Little Helper")($Basics.identity({_: {}}))));
+   var producers = _L.fromArray([santasLittleHelper
+                                ,toyWrapper
+                                ,reindeer]);
+   _elm.Producer.values = {_op: _op
+                          ,Creator: Creator
+                          ,Transformer: Transformer
+                          ,Deliverer: Deliverer
+                          ,Purchasable: Purchasable
+                          ,Functionable: Functionable
+                          ,santasLittleHelper: santasLittleHelper
+                          ,toyWrapper: toyWrapper
+                          ,reindeer: reindeer
+                          ,producers: producers
+                          ,cost: cost
+                          ,produce: produce
+                          ,deliveries: deliveries};
+   return _elm.Producer.values;
+};

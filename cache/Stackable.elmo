@@ -1,0 +1,92 @@
+Elm.Stackable = Elm.Stackable || {};
+Elm.Stackable.make = function (_elm) {
+   "use strict";
+   _elm.Stackable = _elm.Stackable || {};
+   if (_elm.Stackable.values)
+   return _elm.Stackable.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Stackable",
+   $Basics = Elm.Basics.make(_elm),
+   $Common = Elm.Common.make(_elm),
+   $List = Elm.List.make(_elm);
+   var update = F3(function (s,
+   delta,
+   products) {
+      return function () {
+         var update = function (_v0) {
+            return function () {
+               switch (_v0.ctor)
+               {case "_Tuple2":
+                  return _U.eq(_v0._0,
+                    s) ? {ctor: "_Tuple2"
+                         ,_0: _v0._0
+                         ,_1: _v0._1 + delta} : {ctor: "_Tuple2"
+                                                ,_0: _v0._0
+                                                ,_1: _v0._1};}
+               _E.Case($moduleName,
+               "between lines 20 and 21");
+            }();
+         };
+         var updated = $List.filter(function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(_v4._1,0) > 0;}
+               _E.Case($moduleName,
+               "on line 22, column 38 to 43");
+            }();
+         })(A2($List.map,
+         update,
+         products));
+         return _U.eq(updated,
+         products) && _U.cmp(delta,
+         0) > 0 ? A2($List._op["::"],
+         {ctor: "_Tuple2"
+         ,_0: s
+         ,_1: delta},
+         products) : updated;
+      }();
+   });
+   var combine = F2(function (x,
+   y) {
+      return A3($List.foldr,
+      $Basics.uncurry(update),
+      x,
+      y);
+   });
+   var count = F2(function (n,ns) {
+      return function () {
+         var _v8 = A2($List.filter,
+         function (x) {
+            return _U.eq($Basics.fst(x),
+            n);
+         },
+         ns);
+         switch (_v8.ctor)
+         {case "::": switch (_v8._1.ctor)
+              {case "[]":
+                 return $Basics.snd(_v8._0);}
+              break;
+            case "[]": return 0;}
+         _E.Case($moduleName,
+         "between lines 14 and 16");
+      }();
+   });
+   var stack = F2(function (amount,
+   n) {
+      return {ctor: "_Tuple2"
+             ,_0: n
+             ,_1: amount};
+   });
+   _elm.Stackable.values = {_op: _op
+                           ,stack: stack
+                           ,count: count
+                           ,update: update
+                           ,combine: combine};
+   return _elm.Stackable.values;
+};

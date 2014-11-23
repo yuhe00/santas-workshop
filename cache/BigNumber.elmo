@@ -1,0 +1,37 @@
+Elm.BigNumber = Elm.BigNumber || {};
+Elm.BigNumber.make = function (_elm) {
+   "use strict";
+   _elm.BigNumber = _elm.BigNumber || {};
+   if (_elm.BigNumber.values)
+   return _elm.BigNumber.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "BigNumber",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm);
+   var count = F2(function (n,ns) {
+      return function () {
+         var _v0 = A2($List.filter,
+         function (x) {
+            return _U.eq($Basics.fst(x),
+            n);
+         },
+         ns);
+         switch (_v0.ctor)
+         {case "::": switch (_v0._1.ctor)
+              {case "[]":
+                 return $Basics.snd(_v0._0);}
+              break;
+            case "[]": return 0;}
+         _E.Case($moduleName,
+         "between lines 8 and 10");
+      }();
+   });
+   _elm.BigNumber.values = {_op: _op
+                           ,count: count};
+   return _elm.BigNumber.values;
+};

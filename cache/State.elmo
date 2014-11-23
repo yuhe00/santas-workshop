@@ -1,0 +1,134 @@
+Elm.State = Elm.State || {};
+Elm.State.make = function (_elm) {
+   "use strict";
+   _elm.State = _elm.State || {};
+   if (_elm.State.values)
+   return _elm.State.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "State",
+   $Basics = Elm.Basics.make(_elm),
+   $Common = Elm.Common.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Producer = Elm.Producer.make(_elm),
+   $Product = Elm.Product.make(_elm),
+   $Stackable = Elm.Stackable.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var deliverWrapped = F2(function (amount,
+   state) {
+      return function () {
+         var target = state.deliveredPresents + amount;
+         var spiritsGained = $Basics.abs((target / 10 | 0) - (state.deliveredPresents / 10 | 0)) * 100;
+         var deltas = _L.fromArray([{ctor: "_Tuple2"
+                                    ,_0: $Product.wrapped
+                                    ,_1: 0 - amount}
+                                   ,{ctor: "_Tuple2"
+                                    ,_0: $Product.christmasSpirit
+                                    ,_1: spiritsGained}]);
+         var remaining = A2($Stackable.count,
+         $Product.wrapped,
+         state.products);
+         return _U.cmp(remaining - amount,
+         0) > -1 ? _U.replace([["deliveredPresents"
+                               ,target]
+                              ,["products"
+                               ,A2($Stackable.combine,
+                               state.products,
+                               deltas)]],
+         state) : state;
+      }();
+   });
+   var purchase = F3(function (purchasableProducer,
+   amount,
+   state) {
+      return function () {
+         var producer = _U.remove("cost",
+         purchasableProducer);
+         var existing = A2($Stackable.count,
+         producer,
+         state.producers);
+         var range = _L.range(existing,
+         existing + amount - 1);
+         var totalCost = A2($List.foldr,
+         $Stackable.combine,
+         _L.fromArray([]))(A2($List.map,
+         $Producer.cost(purchasableProducer),
+         range));
+         var canAfford = A2($List.all,
+         function (_v0) {
+            return function () {
+               switch (_v0.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(A2($Stackable.count,
+                    _v0._0,
+                    state.products),
+                    _v0._1) > -1;}
+               _E.Case($moduleName,
+               "on line 44, column 38 to 76");
+            }();
+         },
+         totalCost);
+         return canAfford ? _U.replace([["producers"
+                                        ,A3($Stackable.update,
+                                        producer,
+                                        amount,
+                                        state.producers)]
+                                       ,["products"
+                                        ,$Stackable.combine(state.products)(A2($List.map,
+                                        function (_v4) {
+                                           return function () {
+                                              switch (_v4.ctor)
+                                              {case "_Tuple2":
+                                                 return {ctor: "_Tuple2"
+                                                        ,_0: _v4._0
+                                                        ,_1: 0 - _v4._1};}
+                                              _E.Case($moduleName,
+                                              "on line 49, column 80 to 85");
+                                           }();
+                                        },
+                                        totalCost))]],
+         state) : state;
+      }();
+   });
+   var updateDeliveries = F2(function (deltaTime,
+   state) {
+      return A2($Basics.flip,
+      deliverWrapped,
+      state)(A2($Producer.deliveries,
+      state.producers,
+      state.products));
+   });
+   var updateProduction = F2(function (deltaTime,
+   state) {
+      return _U.replace([["products"
+                         ,A3($List.foldr,
+                         $Producer.produce,
+                         state.products,
+                         state.producers)]],
+      state);
+   });
+   var startState = {_: {}
+                    ,deliveredPresents: 0
+                    ,producers: _L.fromArray([])
+                    ,products: _L.fromArray([])};
+   var State = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,deliveredPresents: a
+             ,producers: c
+             ,products: b};
+   });
+   _elm.State.values = {_op: _op
+                       ,State: State
+                       ,startState: startState
+                       ,updateProduction: updateProduction
+                       ,updateDeliveries: updateDeliveries
+                       ,purchase: purchase
+                       ,deliverWrapped: deliverWrapped};
+   return _elm.State.values;
+};
