@@ -1,10 +1,10 @@
-module Producer where
+module Model.Producer where
 
 import Common (..)
-import Stackable
-import Stackable (Stackable, stack)
-import Product
-import Product (Product)
+import Model.Stackable as Stackable
+import Model.Stackable (Stackable, stack)
+import Model.Product as Product
+import Model.Product (Product)
 
 data Function
     = Creator [ Stackable Product ]

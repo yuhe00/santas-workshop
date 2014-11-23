@@ -20,11 +20,11 @@ Elm.Main.make = function (_elm) {
    $Html$Optimize$RefEq = Elm.Html.Optimize.RefEq.make(_elm),
    $Html$Tags = Elm.Html.Tags.make(_elm),
    $List = Elm.List.make(_elm),
-   $Producer = Elm.Producer.make(_elm),
-   $Product = Elm.Product.make(_elm),
+   $Model$Producer = Elm.Model.Producer.make(_elm),
+   $Model$Product = Elm.Model.Product.make(_elm),
+   $Model$Stackable = Elm.Model.Stackable.make(_elm),
+   $Model$State = Elm.Model.State.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Stackable = Elm.Stackable.make(_elm),
-   $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -38,32 +38,32 @@ Elm.Main.make = function (_elm) {
             return action._0(state);
             case "Click":
             return _U.replace([["products"
-                               ,A3($Stackable.update,
-                               $Product.toy,
+                               ,A3($Model$Stackable.update,
+                               $Model$Product.toy,
                                1,
                                state.products)]],
               state);
             case "Deliver":
-            return A2($State.deliverWrapped,
+            return A2($Model$State.deliverWrapped,
               1,
               state);
             case "NoOp": return state;
             case "Purchase":
-            return A3($State.purchase,
+            return A3($Model$State.purchase,
               action._0,
               action._1,
               state);
             case "UpdateDeliveries":
-            return A2($State.updateDeliveries,
+            return A2($Model$State.updateDeliveries,
               action._0,
               state);
             case "UpdateProduction":
-            return A2($State.updateProduction,
+            return A2($Model$State.updateProduction,
               action._0,
               state);
             case "Wrap":
             return _U.replace([["products"
-                               ,A3($Product.wrap,
+                               ,A3($Model$Product.wrap,
                                action._0,
                                1,
                                state.products)]],
@@ -107,7 +107,7 @@ Elm.Main.make = function (_elm) {
                                        updateDeliveriesSignal)]);
       return A2($Signal.foldp,
       step,
-      $State.startState)($Signal.merges(actionSignals));
+      $Model$State.startState)($Signal.merges(actionSignals));
    }();
    var testButtons = A2($Html$Tags.div,
    _L.fromArray([]),
@@ -119,7 +119,7 @@ Elm.Main.make = function (_elm) {
                 ,A2($Html$Tags.button,
                 _L.fromArray([A2($Html$Events.onclick,
                 actionInput.handle,
-                $Basics.always(Wrap($Product.toy)))]),
+                $Basics.always(Wrap($Model$Product.toy)))]),
                 _L.fromArray([$Html.text("Wrap Toy")]))
                 ,A2($Html$Tags.button,
                 _L.fromArray([A2($Html$Events.onclick,
@@ -180,7 +180,7 @@ Elm.Main.make = function (_elm) {
       return function () {
          var producer = _U.remove("cost",
          purchasableProducer);
-         var cost = $Producer.cost(purchasableProducer)(A2($Stackable.count,
+         var cost = $Model$Producer.cost(purchasableProducer)(A2($Model$Stackable.count,
          producer,
          producers));
          var name = $Common.name(producer);
@@ -211,7 +211,7 @@ Elm.Main.make = function (_elm) {
       A2($Basics.flip,
       displayPurchasableProducer,
       producers),
-      $Producer.producers));
+      $Model$Producer.producers));
    };
    var displayDeliveredPresents = function (state) {
       return $Html.text($List.concat(_L.fromArray(["DELIVERED PRESENTS: "

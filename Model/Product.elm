@@ -1,8 +1,8 @@
-module Product where
+module Model.Product where
 
 import Common (..)
-import Stackable
-import Stackable (Stackable)
+import Model.Stackable as Stackable
+import Model.Stackable (Stackable)
 
 type Product = Named { wrappable : Bool, wrapped : Bool }
 

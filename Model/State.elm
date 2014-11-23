@@ -1,12 +1,12 @@
-module State where
+module Model.State where
 
 import Common (..)
-import Stackable
-import Stackable (Stackable)
-import Product
-import Product (Product)
-import Producer
-import Producer (Producer, Purchasable)
+import Model.Stackable as Stackable
+import Model.Stackable (Stackable)
+import Model.Product as Product
+import Model.Product (Product)
+import Model.Producer as Producer
+import Model.Producer (Producer, Purchasable)
 
 type State =
     { deliveredPresents : BigNumber

@@ -1818,11 +1818,11 @@ Elm.Main.make = function (_elm) {
    $Html$Optimize$RefEq = Elm.Html.Optimize.RefEq.make(_elm),
    $Html$Tags = Elm.Html.Tags.make(_elm),
    $List = Elm.List.make(_elm),
-   $Producer = Elm.Producer.make(_elm),
-   $Product = Elm.Product.make(_elm),
+   $Model$Producer = Elm.Model.Producer.make(_elm),
+   $Model$Product = Elm.Model.Product.make(_elm),
+   $Model$Stackable = Elm.Model.Stackable.make(_elm),
+   $Model$State = Elm.Model.State.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Stackable = Elm.Stackable.make(_elm),
-   $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
@@ -1836,32 +1836,32 @@ Elm.Main.make = function (_elm) {
             return action._0(state);
             case "Click":
             return _U.replace([["products"
-                               ,A3($Stackable.update,
-                               $Product.toy,
+                               ,A3($Model$Stackable.update,
+                               $Model$Product.toy,
                                1,
                                state.products)]],
               state);
             case "Deliver":
-            return A2($State.deliverWrapped,
+            return A2($Model$State.deliverWrapped,
               1,
               state);
             case "NoOp": return state;
             case "Purchase":
-            return A3($State.purchase,
+            return A3($Model$State.purchase,
               action._0,
               action._1,
               state);
             case "UpdateDeliveries":
-            return A2($State.updateDeliveries,
+            return A2($Model$State.updateDeliveries,
               action._0,
               state);
             case "UpdateProduction":
-            return A2($State.updateProduction,
+            return A2($Model$State.updateProduction,
               action._0,
               state);
             case "Wrap":
             return _U.replace([["products"
-                               ,A3($Product.wrap,
+                               ,A3($Model$Product.wrap,
                                action._0,
                                1,
                                state.products)]],
@@ -1905,7 +1905,7 @@ Elm.Main.make = function (_elm) {
                                        updateDeliveriesSignal)]);
       return A2($Signal.foldp,
       step,
-      $State.startState)($Signal.merges(actionSignals));
+      $Model$State.startState)($Signal.merges(actionSignals));
    }();
    var testButtons = A2($Html$Tags.div,
    _L.fromArray([]),
@@ -1917,7 +1917,7 @@ Elm.Main.make = function (_elm) {
                 ,A2($Html$Tags.button,
                 _L.fromArray([A2($Html$Events.onclick,
                 actionInput.handle,
-                $Basics.always(Wrap($Product.toy)))]),
+                $Basics.always(Wrap($Model$Product.toy)))]),
                 _L.fromArray([$Html.text("Wrap Toy")]))
                 ,A2($Html$Tags.button,
                 _L.fromArray([A2($Html$Events.onclick,
@@ -1978,7 +1978,7 @@ Elm.Main.make = function (_elm) {
       return function () {
          var producer = _U.remove("cost",
          purchasableProducer);
-         var cost = $Producer.cost(purchasableProducer)(A2($Stackable.count,
+         var cost = $Model$Producer.cost(purchasableProducer)(A2($Model$Stackable.count,
          producer,
          producers));
          var name = $Common.name(producer);
@@ -2009,7 +2009,7 @@ Elm.Main.make = function (_elm) {
       A2($Basics.flip,
       displayPurchasableProducer,
       producers),
-      $Producer.producers));
+      $Model$Producer.producers));
    };
    var displayDeliveredPresents = function (state) {
       return $Html.text($List.concat(_L.fromArray(["DELIVERED PRESENTS: "
@@ -2087,25 +2087,27 @@ Elm.Main.make = function (_elm) {
                       ,scene: scene
                       ,main: main};
    return _elm.Main.values;
-};Elm.State = Elm.State || {};
-Elm.State.make = function (_elm) {
+};Elm.Model = Elm.Model || {};
+Elm.Model.State = Elm.Model.State || {};
+Elm.Model.State.make = function (_elm) {
    "use strict";
-   _elm.State = _elm.State || {};
-   if (_elm.State.values)
-   return _elm.State.values;
+   _elm.Model = _elm.Model || {};
+   _elm.Model.State = _elm.Model.State || {};
+   if (_elm.Model.State.values)
+   return _elm.Model.State.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _A = _N.Array.make(_elm),
    _E = _N.Error.make(_elm),
-   $moduleName = "State",
+   $moduleName = "Model.State",
    $Basics = Elm.Basics.make(_elm),
    $Common = Elm.Common.make(_elm),
    $List = Elm.List.make(_elm),
-   $Producer = Elm.Producer.make(_elm),
-   $Product = Elm.Product.make(_elm),
-   $Stackable = Elm.Stackable.make(_elm),
+   $Model$Producer = Elm.Model.Producer.make(_elm),
+   $Model$Product = Elm.Model.Product.make(_elm),
+   $Model$Stackable = Elm.Model.Stackable.make(_elm),
    $Time = Elm.Time.make(_elm);
    var deliverWrapped = F2(function (amount,
    state) {
@@ -2113,19 +2115,19 @@ Elm.State.make = function (_elm) {
          var target = state.deliveredPresents + amount;
          var spiritsGained = $Basics.abs((target / 10 | 0) - (state.deliveredPresents / 10 | 0)) * 100;
          var deltas = _L.fromArray([{ctor: "_Tuple2"
-                                    ,_0: $Product.wrapped
+                                    ,_0: $Model$Product.wrapped
                                     ,_1: 0 - amount}
                                    ,{ctor: "_Tuple2"
-                                    ,_0: $Product.christmasSpirit
+                                    ,_0: $Model$Product.christmasSpirit
                                     ,_1: spiritsGained}]);
-         var remaining = A2($Stackable.count,
-         $Product.wrapped,
+         var remaining = A2($Model$Stackable.count,
+         $Model$Product.wrapped,
          state.products);
          return _U.cmp(remaining - amount,
          0) > -1 ? _U.replace([["deliveredPresents"
                                ,target]
                               ,["products"
-                               ,A2($Stackable.combine,
+                               ,A2($Model$Stackable.combine,
                                state.products,
                                deltas)]],
          state) : state;
@@ -2137,22 +2139,22 @@ Elm.State.make = function (_elm) {
       return function () {
          var producer = _U.remove("cost",
          purchasableProducer);
-         var existing = A2($Stackable.count,
+         var existing = A2($Model$Stackable.count,
          producer,
          state.producers);
          var range = _L.range(existing,
          existing + amount - 1);
          var totalCost = A2($List.foldr,
-         $Stackable.combine,
+         $Model$Stackable.combine,
          _L.fromArray([]))(A2($List.map,
-         $Producer.cost(purchasableProducer),
+         $Model$Producer.cost(purchasableProducer),
          range));
          var canAfford = A2($List.all,
          function (_v0) {
             return function () {
                switch (_v0.ctor)
                {case "_Tuple2":
-                  return _U.cmp(A2($Stackable.count,
+                  return _U.cmp(A2($Model$Stackable.count,
                     _v0._0,
                     state.products),
                     _v0._1) > -1;}
@@ -2162,12 +2164,12 @@ Elm.State.make = function (_elm) {
          },
          totalCost);
          return canAfford ? _U.replace([["producers"
-                                        ,A3($Stackable.update,
+                                        ,A3($Model$Stackable.update,
                                         producer,
                                         amount,
                                         state.producers)]
                                        ,["products"
-                                        ,$Stackable.combine(state.products)(A2($List.map,
+                                        ,$Model$Stackable.combine(state.products)(A2($List.map,
                                         function (_v4) {
                                            return function () {
                                               switch (_v4.ctor)
@@ -2187,7 +2189,7 @@ Elm.State.make = function (_elm) {
    state) {
       return A2($Basics.flip,
       deliverWrapped,
-      state)(A2($Producer.deliveries,
+      state)(A2($Model$Producer.deliveries,
       state.producers,
       state.products));
    });
@@ -2195,7 +2197,7 @@ Elm.State.make = function (_elm) {
    state) {
       return _U.replace([["products"
                          ,A3($List.foldr,
-                         $Producer.produce,
+                         $Model$Producer.produce,
                          state.products,
                          state.producers)]],
       state);
@@ -2212,37 +2214,39 @@ Elm.State.make = function (_elm) {
              ,producers: c
              ,products: b};
    });
-   _elm.State.values = {_op: _op
-                       ,State: State
-                       ,startState: startState
-                       ,updateProduction: updateProduction
-                       ,updateDeliveries: updateDeliveries
-                       ,purchase: purchase
-                       ,deliverWrapped: deliverWrapped};
-   return _elm.State.values;
-};Elm.Producer = Elm.Producer || {};
-Elm.Producer.make = function (_elm) {
+   _elm.Model.State.values = {_op: _op
+                             ,State: State
+                             ,startState: startState
+                             ,updateProduction: updateProduction
+                             ,updateDeliveries: updateDeliveries
+                             ,purchase: purchase
+                             ,deliverWrapped: deliverWrapped};
+   return _elm.Model.State.values;
+};Elm.Model = Elm.Model || {};
+Elm.Model.Producer = Elm.Model.Producer || {};
+Elm.Model.Producer.make = function (_elm) {
    "use strict";
-   _elm.Producer = _elm.Producer || {};
-   if (_elm.Producer.values)
-   return _elm.Producer.values;
+   _elm.Model = _elm.Model || {};
+   _elm.Model.Producer = _elm.Model.Producer || {};
+   if (_elm.Model.Producer.values)
+   return _elm.Model.Producer.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _A = _N.Array.make(_elm),
    _E = _N.Error.make(_elm),
-   $moduleName = "Producer",
+   $moduleName = "Model.Producer",
    $Basics = Elm.Basics.make(_elm),
    $Common = Elm.Common.make(_elm),
    $List = Elm.List.make(_elm),
-   $Product = Elm.Product.make(_elm),
-   $Stackable = Elm.Stackable.make(_elm);
+   $Model$Product = Elm.Model.Product.make(_elm),
+   $Model$Stackable = Elm.Model.Stackable.make(_elm);
    var deliveries = F2(function (producers,
    products) {
       return function () {
-         var wrapped = A2($Stackable.count,
-         $Product.wrapped,
+         var wrapped = A2($Model$Stackable.count,
+         $Model$Product.wrapped,
          products);
          var step = F2(function (stackableProducer,
          c) {
@@ -2289,7 +2293,7 @@ Elm.Producer.make = function (_elm) {
                          return function () {
                             switch (_v16.ctor)
                             {case "_Tuple2":
-                               return A3($Stackable.update,
+                               return A3($Model$Stackable.update,
                                  _v16._0,
                                  _v16._1 * _v8._1,
                                  ps);}
@@ -2306,7 +2310,7 @@ Elm.Producer.make = function (_elm) {
                             return function () {
                                switch (_v20.ctor)
                                {case "_Tuple2":
-                                  return A2($Stackable.count,
+                                  return A2($Model$Stackable.count,
                                     _v20._0,
                                     products) / _v20._1 | 0;}
                                _E.Case($moduleName,
@@ -2323,7 +2327,7 @@ Elm.Producer.make = function (_elm) {
                                return function () {
                                   switch (_v24.ctor)
                                   {case "_Tuple2":
-                                     return A2($Stackable.update,
+                                     return A2($Model$Stackable.update,
                                        _v24._0,
                                        _v24._1 * multiplier);}
                                   _E.Case($moduleName,
@@ -2339,7 +2343,7 @@ Elm.Producer.make = function (_elm) {
                                return function () {
                                   switch (_v28.ctor)
                                   {case "_Tuple2":
-                                     return A2($Stackable.update,
+                                     return A2($Model$Stackable.update,
                                        _v28._0,
                                        0 - _v28._1 * multiplier);}
                                   _E.Case($moduleName,
@@ -2387,9 +2391,9 @@ Elm.Producer.make = function (_elm) {
       return {ctor: "Deliverer"
              ,_0: a};
    };
-   var reindeer = Functionable(Deliverer(10))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   var reindeer = Functionable(Deliverer(10))(Purchasable(_L.fromArray([A2($Model$Stackable.stack,
    5,
-   $Product.christmasSpirit)]))($Common.Named("Reindeer")($Basics.identity({_: {}}))));
+   $Model$Product.christmasSpirit)]))($Common.Named("Reindeer")($Basics.identity({_: {}}))));
    var Transformer = F2(function (a,
    b) {
       return {ctor: "Transformer"
@@ -2397,57 +2401,59 @@ Elm.Producer.make = function (_elm) {
              ,_1: b};
    });
    var toyWrapper = Functionable(A2(Transformer,
-   _L.fromArray([A2($Stackable.stack,
+   _L.fromArray([A2($Model$Stackable.stack,
    1,
-   $Product.toy)]),
-   _L.fromArray([A2($Stackable.stack,
+   $Model$Product.toy)]),
+   _L.fromArray([A2($Model$Stackable.stack,
    1,
-   $Product.wrapped)])))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   $Model$Product.wrapped)])))(Purchasable(_L.fromArray([A2($Model$Stackable.stack,
    3,
-   $Product.christmasSpirit)]))($Common.Named("Toy Wrapper")($Basics.identity({_: {}}))));
+   $Model$Product.christmasSpirit)]))($Common.Named("Toy Wrapper")($Basics.identity({_: {}}))));
    var Creator = function (a) {
       return {ctor: "Creator"
              ,_0: a};
    };
-   var santasLittleHelper = Functionable(Creator(_L.fromArray([A2($Stackable.stack,
+   var santasLittleHelper = Functionable(Creator(_L.fromArray([A2($Model$Stackable.stack,
    1,
-   $Product.toy)])))(Purchasable(_L.fromArray([A2($Stackable.stack,
+   $Model$Product.toy)])))(Purchasable(_L.fromArray([A2($Model$Stackable.stack,
    1,
-   $Product.christmasSpirit)]))($Common.Named("Santa\'s Little Helper")($Basics.identity({_: {}}))));
+   $Model$Product.christmasSpirit)]))($Common.Named("Santa\'s Little Helper")($Basics.identity({_: {}}))));
    var producers = _L.fromArray([santasLittleHelper
                                 ,toyWrapper
                                 ,reindeer]);
-   _elm.Producer.values = {_op: _op
-                          ,Creator: Creator
-                          ,Transformer: Transformer
-                          ,Deliverer: Deliverer
-                          ,Purchasable: Purchasable
-                          ,Functionable: Functionable
-                          ,santasLittleHelper: santasLittleHelper
-                          ,toyWrapper: toyWrapper
-                          ,reindeer: reindeer
-                          ,producers: producers
-                          ,cost: cost
-                          ,produce: produce
-                          ,deliveries: deliveries};
-   return _elm.Producer.values;
-};Elm.Product = Elm.Product || {};
-Elm.Product.make = function (_elm) {
+   _elm.Model.Producer.values = {_op: _op
+                                ,Creator: Creator
+                                ,Transformer: Transformer
+                                ,Deliverer: Deliverer
+                                ,Purchasable: Purchasable
+                                ,Functionable: Functionable
+                                ,santasLittleHelper: santasLittleHelper
+                                ,toyWrapper: toyWrapper
+                                ,reindeer: reindeer
+                                ,producers: producers
+                                ,cost: cost
+                                ,produce: produce
+                                ,deliveries: deliveries};
+   return _elm.Model.Producer.values;
+};Elm.Model = Elm.Model || {};
+Elm.Model.Product = Elm.Model.Product || {};
+Elm.Model.Product.make = function (_elm) {
    "use strict";
-   _elm.Product = _elm.Product || {};
-   if (_elm.Product.values)
-   return _elm.Product.values;
+   _elm.Model = _elm.Model || {};
+   _elm.Model.Product = _elm.Model.Product || {};
+   if (_elm.Model.Product.values)
+   return _elm.Model.Product.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _A = _N.Array.make(_elm),
    _E = _N.Error.make(_elm),
-   $moduleName = "Product",
+   $moduleName = "Model.Product",
    $Basics = Elm.Basics.make(_elm),
    $Common = Elm.Common.make(_elm),
    $List = Elm.List.make(_elm),
-   $Stackable = Elm.Stackable.make(_elm);
+   $Model$Stackable = Elm.Model.Stackable.make(_elm);
    var wrappable = {_: {}
                    ,wrappable: true
                    ,wrapped: false};
@@ -2472,12 +2478,12 @@ Elm.Product.make = function (_elm) {
                                             ,{ctor: "_Tuple2"
                                              ,_0: wrapped
                                              ,_1: amount}]);
-                 var remaining = A2($Stackable.count,
+                 var remaining = A2($Model$Stackable.count,
                  product,
                  products);
                  return _U.cmp(remaining - amount,
                  0) > -1 ? A3($List.foldr,
-                 $Basics.uncurry($Stackable.update),
+                 $Basics.uncurry($Model$Stackable.update),
                  products,
                  updates) : products;
               }();}
@@ -2487,28 +2493,30 @@ Elm.Product.make = function (_elm) {
    });
    var christmasSpirit = $Common.Named("Christmas Spirit")(consumable);
    var santasBlessing = $Common.Named("Santa\'s Blessing")(consumable);
-   _elm.Product.values = {_op: _op
-                         ,consumable: consumable
-                         ,wrappable: wrappable
-                         ,wrapped: wrapped
-                         ,christmasSpirit: christmasSpirit
-                         ,santasBlessing: santasBlessing
-                         ,toy: toy
-                         ,wrap: wrap};
-   return _elm.Product.values;
-};Elm.Stackable = Elm.Stackable || {};
-Elm.Stackable.make = function (_elm) {
+   _elm.Model.Product.values = {_op: _op
+                               ,consumable: consumable
+                               ,wrappable: wrappable
+                               ,wrapped: wrapped
+                               ,christmasSpirit: christmasSpirit
+                               ,santasBlessing: santasBlessing
+                               ,toy: toy
+                               ,wrap: wrap};
+   return _elm.Model.Product.values;
+};Elm.Model = Elm.Model || {};
+Elm.Model.Stackable = Elm.Model.Stackable || {};
+Elm.Model.Stackable.make = function (_elm) {
    "use strict";
-   _elm.Stackable = _elm.Stackable || {};
-   if (_elm.Stackable.values)
-   return _elm.Stackable.values;
+   _elm.Model = _elm.Model || {};
+   _elm.Model.Stackable = _elm.Model.Stackable || {};
+   if (_elm.Model.Stackable.values)
+   return _elm.Model.Stackable.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _A = _N.Array.make(_elm),
    _E = _N.Error.make(_elm),
-   $moduleName = "Stackable",
+   $moduleName = "Model.Stackable",
    $Basics = Elm.Basics.make(_elm),
    $Common = Elm.Common.make(_elm),
    $List = Elm.List.make(_elm);
@@ -2527,7 +2535,7 @@ Elm.Stackable.make = function (_elm) {
                                                 ,_0: _v0._0
                                                 ,_1: _v0._1};}
                _E.Case($moduleName,
-               "between lines 20 and 21");
+               "between lines 18 and 19");
             }();
          };
          var updated = $List.filter(function (_v4) {
@@ -2536,7 +2544,7 @@ Elm.Stackable.make = function (_elm) {
                {case "_Tuple2":
                   return _U.cmp(_v4._1,0) > 0;}
                _E.Case($moduleName,
-               "on line 22, column 38 to 43");
+               "on line 20, column 38 to 43");
             }();
          })(A2($List.map,
          update,
@@ -2572,7 +2580,7 @@ Elm.Stackable.make = function (_elm) {
               break;
             case "[]": return 0;}
          _E.Case($moduleName,
-         "between lines 14 and 16");
+         "between lines 12 and 14");
       }();
    });
    var stack = F2(function (amount,
@@ -2581,12 +2589,12 @@ Elm.Stackable.make = function (_elm) {
              ,_0: n
              ,_1: amount};
    });
-   _elm.Stackable.values = {_op: _op
-                           ,stack: stack
-                           ,count: count
-                           ,update: update
-                           ,combine: combine};
-   return _elm.Stackable.values;
+   _elm.Model.Stackable.values = {_op: _op
+                                 ,stack: stack
+                                 ,count: count
+                                 ,update: update
+                                 ,combine: combine};
+   return _elm.Model.Stackable.values;
 };Elm.Common = Elm.Common || {};
 Elm.Common.make = function (_elm) {
    "use strict";

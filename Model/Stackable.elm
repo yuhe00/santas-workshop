@@ -1,8 +1,6 @@
-module Stackable where
+module Model.Stackable where
 
 import Common (..)
-import String
-import Char
 
 type Stackable a = (a, BigNumber)
 
@@ -28,6 +26,9 @@ combine : [ Stackable a ] -> [ Stackable a ] -> [ Stackable a ]
 combine x y = foldr (uncurry update) x y
 
 {-
+import String
+import Char
+
 type BigInt = [ Int ]
 
 bigInt : Int -> BigInt

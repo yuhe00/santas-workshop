@@ -8,14 +8,14 @@ import Window
 
 import Common
 import Common (BigNumber)
-import Stackable
-import Stackable (Stackable)
-import State
-import State (State)
-import Product
-import Product (Product)
-import Producer
-import Producer (Producer, Purchasable)
+import Model.Stackable as Stackable
+import Model.Stackable (Stackable)
+import Model.State as State
+import Model.State (State)
+import Model.Product as Product
+import Model.Product (Product)
+import Model.Producer as Producer
+import Model.Producer (Producer, Purchasable)
 
 -- VIEW
 
