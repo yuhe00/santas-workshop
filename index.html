@@ -15,7 +15,7 @@
     <script type="text/javascript" src="build/Main.js"></script>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="vendor/humane-js-master/humane.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   </head>
   <body>
      <!--
@@ -37,7 +37,7 @@
     </script>
     -->
     <script type="text/javascript">
-      var main = Elm.debugFullscreen(Elm.Main, "Main.elm", false);
+      var main = Elm.fullscreen(Elm.Main);
       main.ports.showNotification.subscribe(elmShowNotification);
       function elmShowNotification(message) {
         if(message.length > 0) {
@@ -48,4 +48,3 @@
     </script>
   </body>
 </html>
->>>>>>> master
