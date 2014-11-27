@@ -1,1 +1,51 @@
-HELLO!
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Santa's Workshop</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">-->
+    <link rel="stylesheet" href="vendor/bootstrap/slate/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/humane-js-master/themes/jackedup.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="/elm-runtime.js"></script>
+    <script type="text/javascript" src="/debugger.js"></script>
+    <script type="text/javascript" src="build/Main.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="vendor/humane-js-master/humane.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+     <!--
+     <script type="text/javascript">
+      var storedState = localStorage.getItem('elm-todo-state');
+      var startingState = storedState ? JSON.parse(storedState) : null;
+      var todomvc = Elm.fullscreen(Elm.Todo, { getStorage: startingState });
+      todomvc.ports.focus.subscribe(function(selector) {
+          setTimeout(function() {
+              var nodes = document.querySelectorAll(selector);
+              if (nodes.length === 1 && document.activeElement !== nodes[0]) {
+                  nodes[0].focus()
+              }
+          }, 50);
+      });
+      todomvc.ports.setStorage.subscribe(function(state) {
+          localStorage.setItem('elm-todo-state', JSON.stringify(state));
+      }); 
+    </script>
+    -->
+    <script type="text/javascript">
+      var main = Elm.debugFullscreen(Elm.Main, "Main.elm", false);
+      main.ports.showNotification.subscribe(elmShowNotification);
+      function elmShowNotification(message) {
+        if(message.length > 0) {
+          humane.baseCls = 'humane-jackedup';
+          humane.log(message);
+        }
+      }
+    </script>
+  </body>
+</html>
+>>>>>>> master
