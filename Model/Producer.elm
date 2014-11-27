@@ -11,26 +11,50 @@ data Function
     | Transformer [ Stackable Product ] [ Stackable Product ]
     | Deliverer BigNumber
 
-type Purchasable a = { a | cost : [ Stackable Product ] }
-type Functionable a = { a | function : Function }
-type Producer = Named (Functionable {})
+type Purchasable x = { x | cost : [ Stackable Product ] }
+type Functional x = { x | function : Function }
+type Producer = Named (Functional {})
+
+lumberjack
+    = identity {}
+    |> Named "Lumberjack"
+    |> Purchasable [ stack 10 Product.wood, stack 1 Product.spirit ]
+    |> Functional
+        ( Creator [ stack 1 Product.wood ] )
+
+miner
+    = identity {}
+    |> Named "Miner"
+    |> Purchasable [ stack 10 Product.metal ]
+    |> Functional
+        ( Creator [ stack 1 Product.metal ] )
+
+oilRig
+    = identity {}
+    |> Named "Oil Rig"
+    |> Purchasable
+        [ stack 50 Product.wood
+        , stack 50 Product.metal
+        ]
+    |> Functional
+        ( Creator [ stack 1 Product.oil ] )
 
 santasLittleHelper : Purchasable Producer
 santasLittleHelper
     = identity {}
     |> Named "Santa's Little Helper"
-    |> Purchasable [ stack 1 Product.christmasSpirit ]
-    |> Functionable
+    |> Purchasable [ stack 1 Product.spirit ]
+    |> Functional
         ( Creator [ stack 1 Product.toy ] )
 
 toyWrapper : Purchasable Producer
 toyWrapper
     = identity {}
     |> Named "Toy Wrapper"
-    |> Purchasable [ stack 3 Product.christmasSpirit ]
-    |> Functionable
+    |> Purchasable [ stack 3 Product.spirit ]
+    |> Functional
         ( Transformer
-            [ stack 1 Product.toy ]
+            [ stack 1 Product.toy, stack 1 Product.wrappingPaper ]
             [ stack 1 Product.wrapped ]
         )
 
@@ -38,21 +62,20 @@ reindeer : Purchasable Producer
 reindeer
     = identity {}
     |> Named "Reindeer"
-    |> Purchasable [ stack 5 Product.christmasSpirit ]
-    |> Functionable
+    |> Purchasable [ stack 5 Product.spirit ]
+    |> Functional
         ( Deliverer 10 )
 
-producers : [ Purchasable Producer ]
-producers =
-    [ santasLittleHelper,
-      toyWrapper,
-      reindeer
-    ]
-
-cost : Purchasable Producer -> BigNumber -> [ Stackable Product ] 
-cost purchasableProducer x =
+cost' : Purchasable Producer -> BigNumber -> [ Stackable Product ] 
+cost' purchasableProducer x =
     --map (\(p, n) -> (p, (n * x)^(x // 2) + x^2)) baseCost
-    map (\(p, n) -> (p, (n + x)^2)) purchasableProducer.cost
+    map (\(p, n) -> (p, n + (n * x)^2)) purchasableProducer.cost
+
+cost : Purchasable Producer -> BigNumber -> BigNumber -> [ Stackable Product ] 
+cost purchasableProducer existing amount =
+    let range = [existing..(existing + amount - 1)]
+    in
+        foldr Stackable.combine [] <| map (cost' purchasableProducer) range
 
 produce : Stackable Producer -> [ Stackable Product ] -> [ Stackable Product ]
 produce (producer, amount) products =
