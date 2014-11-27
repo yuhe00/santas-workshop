@@ -1,4 +1,4 @@
-module Main where
+module Santa where
 
 import Html (..)
 import Html.Attributes (..)
