@@ -37,7 +37,7 @@
     </script>
     -->
     <script type="text/javascript">
-      var instance = Elm.debugFullscreen(Elm.Santa, "Santa.elm");
+      var instance = Elm.debugFullscreen(Elm.Santa, "Santa.elm", false);
       instance.ports.showNotification.subscribe(elmShowNotification);
       function elmShowNotification(message) {
         if(message.length > 0) {
