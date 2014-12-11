@@ -1,12 +1,9 @@
-module Common where
+module Santa.Common where
 
-type BigNumber = Int
+type alias BigNumber = Int
 
-type Named x = { x | name : String }
-type Descriptive x = { x | description : String }
-
-name : Named a -> String
-name named = named.name
+type alias Named x = { x | name : String }
+type alias Descriptive x = { x | description : String }
 
 {-
 import String
