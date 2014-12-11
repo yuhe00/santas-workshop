@@ -1,90 +1,56 @@
-/* BOOTSTRAP FIX */
+/* ACHIEVEMENTS */
 
-.row-centered {
+dl.achievement {
+    margin: 2em 0;
+    padding: 0;
+}
+dl.achievements dt img {
+    width: 70px;
+    height: 70px;
+    float: left;
+    background-color: #ccc;
+    border: 1px solid #000;
+}
+dl.achievements dt.unlocked img {
+    background-color: #fff;
+}
+dl.achievements dt {
+    background-color: #000;
+    color: #fff;
+    padding: .5em;
+    font-weight: bold;
     text-align: center;
+    text-transform: uppercase;
+    border-left: 1px solid #131210;
+    border-right: 1px solid #131210;
+    border-top: 1px solid #131210;
 }
-.col-centered {
-    display: inline-block;
-    float: none;
+dl.achievements dt.unlocked {
+    background-color: #f00;
+    color: #fff;
 }
-a.hovertext {
-  position: relative;
-  text-decoration: none !important;
-  text-align: center;
-}
-a.hovertext:after {
-  content: attr(title);
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -56px;
-  font-size: 24pt;
-  font-weight: bolder;
-  opacity: 1;
-  -webkit-transition: 0.5s;
-  -moz-transition: 0.5s;
-  -o-transition: 0.5s;
-  -ms-transition: 0.5s;
-  color: #000;
-  text-shadow: 0 0 10px #fff;
-  -webkit-text-fill-color: #fff; /* Will override color (regardless of order) */
-  -webkit-text-stroke-width: 1.5px;
-  -webkit-text-stroke-color: #000;
-}
-a.hovertext:hover:after, a.hovertext:focus:after {
-  opacity: 1;
-}
-/*.progress .progress-bar {
-    -webkit-transition: none;
-    -moz-transition: none;
-    -ms-transition: none;
-    -o-transition: none;
-    transition: none;
-}​*/
-
-/* MISC */
-
-html {
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-.jumbotron {
-  padding: 0em;
-  margin: 1em;
-}
-.table tbody tr td {
-  vertical-align: middle;
-}
-div.progress {
-  margin: auto;
-}
-div.amount {
-  font-size: 22pt;
-  text-align: right;
-  width: 3em;
-}
-div.primaryResources {
-  padding-bottom: 1em;
-  width: 12em;
-}
-/* [ property "font-size" "22pt"
-    , property "text-align" "right"
-    , property "width" "3em"
-    ]*/
-footer {
-  padding-bottom: 2em;
+dl.achievements dd {
+    margin: 0 0 1em 0;
+    background: #ccc;
+    color: #000;
+    text-align: center;
+    padding: 1em .5em;
+    font-style: italic;
+    border-left: 1px solid #131210;
+    border-right: 1px solid #131210;
+    border-bottom: 1px solid #131210;
 }
 
 /* TOOLTIPS */
 
 div.tooltip-wrapper ul {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
 }
 div.tooltip-wrapper li {
-  font-size: 12pt;
-  line-height: 12pt;
+    font-size: 12pt;
+    line-height: 12pt;
 }
 div.tooltip {
   background-color: #000;
@@ -101,73 +67,11 @@ div.tooltip {
   transition: opacity 0.5s;
   visibility: hidden;
 }
-div.tooltip div {
-  white-space: nowrap;
-}
 div.tooltip-wrapper .trigger:hover {
-  cursor: pointer;
-  cursor: hand;
+    cursor: pointer;
+    cursor: hand;
 }
 div.tooltip-wrapper:hover .tooltip {
-  opacity: 0.8;
-  visibility: visible;
+    opacity: 0.8;
+    visibility: visible;
 }
-div.tooltipFunction {
-  vertical-align: middle;
-  padding: 0.5em;
-}
-span.tooltipFunctionTransformer {
-  display: inline-block;
-  vertical-align: middle;
-  padding: 0.5em;
-}
-
-/* SNOW EFFECT */
-
-body {
-  background: #b4cfe0;
-}
-canvas {
-  display: block;
-  position: absolute;
-}
-/* body {
-  background-color: #6b92b9;
-  background-image: url('http://i.imgur.com/BiSmXaq.png'), url('http://i.imgur.com/XHuy0NJ.png'), url('http://i.imgur.com/okpRxJU.png');
-  -webkit-animation: snow 20s linear infinite;
-  -moz-animation: snow 20s linear infinite;
-  -ms-animation: snow 20s linear infinite;
-  animation: snow 20s linear infinite;
-}
-@-webkit-keyframes snow {
-  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
-  50% { background-color: #b4cfe0 }
-  100% {
-    background-position: 500px 1000px, 400px 400px, 300px 300px;
-    background-color: #6b92b9;
-  }
-}
-@-moz-keyframes snow {
-  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
-  50% { background-color: #b4cfe0 }
-  100% {
-    background-position: 500px 1000px, 400px 400px, 300px 300px;
-    background-color: #6b92b9;
-  }
-}
-@-ms-keyframes snow {
-  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
-  50% { background-color: #b4cfe0 }
-  100% {
-    background-position: 500px 1000px, 400px 400px, 300px 300px;
-    background-color: #6b92b9;
-  }
-}
-@keyframes snow {
-  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
-  50% { background-color: #b4cfe0 }
-  100% {
-    background-position: 500px 1000px, 400px 400px, 300px 300px;
-    background-color: #6b92b9;
-  }
-} */

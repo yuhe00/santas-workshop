@@ -6,15 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Santa's Workshop</title>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
-    <!--<link rel="stylesheet" href="vendor/bootstrap/slate/bootstrap.min.css">-->
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">-->
+    <link rel="stylesheet" href="vendor/bootstrap/slate/bootstrap.min.css">
     <link rel="stylesheet" href="vendor/humane-js-master/themes/jackedup.css">
     <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="elm.js"></script>
+    <script type="text/javascript" src="release/Santa.js"></script>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="vendor/humane-js-master/humane.min.js"></script>
-    <script type="text/javascript" src="vendor/snow/snow.js"></script>
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   </head>
   <body>
      <!--
@@ -35,15 +34,15 @@
       }); 
     </script>
     -->
-    <canvas id="canvas"></canvas>
     <script type="text/javascript">
       var instance = Elm.fullscreen(Elm.Santa);
-      instance.ports.showNotification.subscribe(function (message) {
+      instance.ports.showNotification.subscribe(elmShowNotification);
+      function elmShowNotification(message) {
         if(message.length > 0) {
           humane.baseCls = 'humane-jackedup';
           humane.log(message);
         }
-      });
+      }
     </script>
   </body>
 </html>
