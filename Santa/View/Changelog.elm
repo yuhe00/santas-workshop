@@ -14,15 +14,26 @@ type alias Changelog =
     , changes : List String
     }
 
+changelogs : List Changelog
+changelogs =
+    [ { version = (0, 1, 0)
+      , changes = [ "Initial release." ]
+      }
+    ]
+
 versionString : (Int, Int, Int) -> String
 versionString (a, b, c) = toString a ++ "." ++ toString b ++ "." ++ toString c 
 
-display : List Changelog -> Html
-display changelogs =
+displayVersion : Html
+displayVersion =
+    text <| "Version " ++ (versionString <| .version <| head changelogs)
+
+display : Html
+display =
     let displayOne changelog =
             div
                 []
-                [ u [] [ versionString changelog.version ]
+                [ u [] [ text <| versionString changelog.version ]
                 , ul
                     []
                     <| map (\x -> li [] [ text x ] ) changelog.changes
