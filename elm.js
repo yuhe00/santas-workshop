@@ -10886,15 +10886,6 @@ Elm.Santa.Model.Producer.make = function (_elm) {
    var reindeer = Functional(_L.fromArray([Deliverer(3)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    5,
    $Santa$Model$Product.spirit)]))($Santa$Common.Named("Reindeer")($Basics.identity({_: {}}))));
-   var airplane = Functional(_L.fromArray([Deliverer(10)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                              10,
-                                                                                                              $Santa$Model$Product.metal)
-                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                              10,
-                                                                                                              $Santa$Model$Product.oil)
-                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                              10,
-                                                                                                              $Santa$Model$Product.spirit)]))($Santa$Common.Named("Airplane")($Basics.identity({_: {}}))));
    var Transformer = F2(function (a,
    b) {
       return {ctor: "Transformer"
@@ -11076,7 +11067,7 @@ Elm.Santa.Model.Producer.make = function (_elm) {
                                                     1,
                                                     $Santa$Model$Product.wrapped)]))]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    3,
-   $Santa$Model$Product.spirit)]))($Santa$Common.Named("Boxed Toy Wrapper")($Basics.identity({_: {}}))));
+   $Santa$Model$Product.spirit)]))($Santa$Common.Named("Advanced Toy Wrapper")($Basics.identity({_: {}}))));
    var highTechToyWrapper = Functional(_L.fromArray([A2(Transformer,
                                                     _L.fromArray([A2($Santa$Model$Stackable.stack,
                                                                  1,
@@ -11156,8 +11147,7 @@ Elm.Santa.Model.Producer.make = function (_elm) {
                                       ,toyWrapper: toyWrapper
                                       ,advancedToyWrapper: advancedToyWrapper
                                       ,highTechToyWrapper: highTechToyWrapper
-                                      ,reindeer: reindeer
-                                      ,airplane: airplane};
+                                      ,reindeer: reindeer};
    return _elm.Santa.Model.Producer.values;
 };
 Elm.Santa = Elm.Santa || {};
@@ -11956,6 +11946,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    $Santa$Model$Product = Elm.Santa.Model.Product.make(_elm),
    $Santa$Model$Purchasable = Elm.Santa.Model.Purchasable.make(_elm),
    $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
+   $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm);
    var producerPower$ = function (bonus) {
       return function () {
@@ -12108,7 +12099,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
          var producerPowers = function () {
             var display = F2(function (x,
             n) {
-               return $Maybe.Just(A2($Basics._op["++"],
+               return A2($Basics._op["++"],
                "Increases the efficiency of ",
                A2($Basics._op["++"],
                x.name,
@@ -12116,7 +12107,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                " by ",
                A2($Basics._op["++"],
                formatPct(n),
-               ".")))));
+               "."))));
             });
             var ps = A2($List.filterMap,
             producerPower$,
@@ -12144,10 +12135,10 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                ps));
             },
             products);
-            return A3($List.map2,
+            return $List.isEmpty(ps) ? $Maybe.Nothing : $Maybe.Just($String.concat(A3($List.map2,
             display,
             products,
-            totals);
+            totals)));
          }();
          var formatPower = F3(function ($function,
          displayFunction,
@@ -12205,8 +12196,8 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                           "."));
                        }}]));
          return $List.filterMap($Basics.identity)($List.concat(_L.fromArray([powers
-                                                                            ,producerPowers
-                                                                            ,_L.fromArray([unlockedProducers
+                                                                            ,_L.fromArray([producerPowers
+                                                                                          ,unlockedProducers
                                                                                           ,unlockeds])])));
       }();
    };
@@ -12243,13 +12234,13 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                                                                                                                ,A2($Santa$Model$Stackable.stack,
                                                                                                                                                100,
                                                                                                                                                $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Plastics")($Basics.identity({_: {}})))));
-   var batteryPower = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.batteryFactory)
-                                           ,UnlockProducer($Santa$Model$Producer.rcCarFactory)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                                                    300,
-                                                                                                                                                    $Santa$Model$Product.oil)
-                                                                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                                                                    100,
-                                                                                                                                                    $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Battery Power")($Basics.identity({_: {}})))));
+   var batteries = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.batteryFactory)
+                                        ,UnlockProducer($Santa$Model$Producer.rcCarFactory)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                                                                 300,
+                                                                                                                                                 $Santa$Model$Product.oil)
+                                                                                                                                                 ,A2($Santa$Model$Stackable.stack,
+                                                                                                                                                 100,
+                                                                                                                                                 $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Battery Power")($Basics.identity({_: {}})))));
    var papermaking = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.paperFactory)
                                           ,UnlockProducer($Santa$Model$Producer.toyWrapper)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
                                                                                                                                                  20,
@@ -12263,135 +12254,31 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
              ,_0: a
              ,_1: b};
    });
-   var recycling = Upgrade(_L.fromArray([A2(ProducerPower,
-                                        $Santa$Model$Producer.woodenToyMaker,
-                                        1)
-                                        ,A2(ProducerPower,
-                                        $Santa$Model$Producer.metalCarFactory,
-                                        1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                300,
-                                                                                                $Santa$Model$Product.wood)
-                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                300,
-                                                                                                $Santa$Model$Product.metal)
-                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                100,
-                                                                                                $Santa$Model$Product.oil)
-                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                100,
-                                                                                                $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Recycling")($Basics.identity({_: {}})))));
-   var assemblyLine = Upgrade(_L.fromArray([A2(ProducerPower,
-                                           $Santa$Model$Producer.rcCarFactory,
-                                           1)
-                                           ,A2(ProducerPower,
-                                           $Santa$Model$Producer.legoFactory,
-                                           1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                   3000,
-                                                                                                   $Santa$Model$Product.wood)
-                                                                                                   ,A2($Santa$Model$Stackable.stack,
-                                                                                                   3000,
-                                                                                                   $Santa$Model$Product.metal)
-                                                                                                   ,A2($Santa$Model$Stackable.stack,
-                                                                                                   1000,
-                                                                                                   $Santa$Model$Product.oil)
-                                                                                                   ,A2($Santa$Model$Stackable.stack,
-                                                                                                   1000,
-                                                                                                   $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Assembly Line")($Basics.identity({_: {}})))));
-   var rainForestDeregulation = Upgrade(_L.fromArray([A2(ProducerPower,
-   $Santa$Model$Producer.lumberjack,
-   5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   1000,
-   $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Rainforest Deregulation")($Basics.identity({_: {}})))));
    var chainsaws = Upgrade(_L.fromArray([A2(ProducerPower,
-                                        $Santa$Model$Producer.lumberjack,
-                                        3)
-                                        ,Unlock(rainForestDeregulation)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                             150,
-                                                                                                                             $Santa$Model$Product.metal)
-                                                                                                                             ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             150,
-                                                                                                                             $Santa$Model$Product.oil)
-                                                                                                                             ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             100,
-                                                                                                                             $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Chainsaws")($Basics.identity({_: {}})))));
-   var nuclearPoweredDrills = Upgrade(_L.fromArray([A2(ProducerPower,
-   $Santa$Model$Producer.miner,
-   5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                           3000,
-                                                           $Santa$Model$Product.metal)
-                                                           ,A2($Santa$Model$Stackable.stack,
-                                                           1000,
-                                                           $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Nuclear-powered Drills")($Basics.identity({_: {}})))));
-   var goldRush = Upgrade(_L.fromArray([A2(ProducerPower,
-                                       $Santa$Model$Producer.miner,
-                                       3)
-                                       ,Unlock(nuclearPoweredDrills)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                          300,
-                                                                                                                          $Santa$Model$Product.metal)
-                                                                                                                          ,A2($Santa$Model$Stackable.stack,
-                                                                                                                          100,
-                                                                                                                          $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Gold Rush!")($Basics.identity({_: {}})))));
-   var heavyMachinery = Upgrade(_L.fromArray([A2(ProducerPower,
-                                             $Santa$Model$Producer.miner,
-                                             1)
-                                             ,Unlock(goldRush)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                    30,
-                                                                                                                    $Santa$Model$Product.metal)
-                                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                                    10,
-                                                                                                                    $Santa$Model$Product.spirit)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Heavy Machinery")($Basics.identity({_: {}})))));
-   var redNosePaint = Upgrade(_L.fromArray([A2(ProducerPower,
-   $Santa$Model$Producer.reindeer,
+   $Santa$Model$Producer.lumberjack,
    1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                           100,
-                                                           $Santa$Model$Product.wood)
-                                                           ,A2($Santa$Model$Stackable.stack,
-                                                           100,
-                                                           $Santa$Model$Product.metal)
-                                                           ,A2($Santa$Model$Stackable.stack,
-                                                           100,
-                                                           $Santa$Model$Product.spirit)]))(researchable(10 * $Time.minute)($Santa$Common.Named("Red Nose-paint")($Basics.identity({_: {}})))));
-   var globalPositioningSystem = Upgrade(_L.fromArray([A2(ProducerPower,
-                                                      $Santa$Model$Producer.reindeer,
-                                                      2)
-                                                      ,A2(ProducerPower,
-                                                      $Santa$Model$Producer.airplane,
-                                                      2)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
-                                                                                                              $Santa$Model$Product.wood)
-                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
-                                                                                                              $Santa$Model$Product.metal)
-                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
-                                                                                                              $Santa$Model$Product.oil)
-                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                              1000,
-                                                                                                              $Santa$Model$Product.spirit)]))(researchable(24 * $Time.hour)($Santa$Common.Named("Global Positioning System")($Basics.identity({_: {}})))));
-   var aviation = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.airplane)
-                                       ,Unlock(globalPositioningSystem)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
-                                                                                                                             $Santa$Model$Product.wood)
-                                                                                                                             ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
-                                                                                                                             $Santa$Model$Product.metal)
-                                                                                                                             ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
-                                                                                                                             $Santa$Model$Product.oil)
-                                                                                                                             ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             100,
-                                                                                                                             $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Aviation")($Basics.identity({_: {}})))));
+   30,
+   $Santa$Model$Product.metal)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Chainsaws")($Basics.identity({_: {}})))));
    var ResearchPower = function (a) {
       return {ctor: "ResearchPower"
              ,_0: a};
    };
+   var scientificMethod = Upgrade(_L.fromArray([ResearchPower(0.2)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                                        10,
+                                                                                                                        $Santa$Model$Product.wood)
+                                                                                                                        ,A2($Santa$Model$Stackable.stack,
+                                                                                                                        10,
+                                                                                                                        $Santa$Model$Product.metal)
+                                                                                                                        ,A2($Santa$Model$Stackable.stack,
+                                                                                                                        10,
+                                                                                                                        $Santa$Model$Product.oil)]))(researchable(10 * $Time.second)($Santa$Common.Named("Scientific Method")($Basics.identity({_: {}})))));
    var SpiritPower = function (a) {
       return {ctor: "SpiritPower"
              ,_0: a};
    };
    var spiritsOfTheForest = Upgrade(_L.fromArray([SpiritPower(1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    100,
-   $Santa$Model$Product.wood)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Spirits of the Forest")($Basics.identity({_: {}})))));
+   $Santa$Model$Product.wood)]))(researchable(5 * $Time.minute)($Santa$Common.Named("Spirits of the Forest")($Basics.identity({_: {}})))));
    var reindeerFarm = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.reindeer)
                                            ,Unlock(spiritsOfTheForest)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
                                                                                                                             30,
@@ -12402,142 +12289,60 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                                                                                             ,A2($Santa$Model$Stackable.stack,
                                                                                                                             10,
                                                                                                                             $Santa$Model$Product.spirit)]))(researchable(1 * $Time.minute)($Santa$Common.Named("Reindeer Farm")($Basics.identity({_: {}})))));
-   var spiritsOfTheEarth = Upgrade(_L.fromArray([SpiritPower(3)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   1000,
-   $Santa$Model$Product.metal)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Spirits of the Earth")($Basics.identity({_: {}})))));
-   var fracking = Upgrade(_L.fromArray([A2(ProducerPower,
-                                       $Santa$Model$Producer.oilRig,
-                                       5)
-                                       ,Unlock(spiritsOfTheEarth)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
-                                                                                                                       $Santa$Model$Product.wood)
-                                                                                                                       ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
-                                                                                                                       $Santa$Model$Product.metal)
-                                                                                                                       ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
-                                                                                                                       $Santa$Model$Product.oil)
-                                                                                                                       ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       1000,
-                                                                                                                       $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Hydrofracking")($Basics.identity({_: {}})))));
-   var spiritsOfOurAncestors = Upgrade(_L.fromArray([SpiritPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   10000,
-   $Santa$Model$Product.oil)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Spirits of our Ancestors")($Basics.identity({_: {}})))));
    var ClickPower = function (a) {
       return {ctor: "ClickPower"
              ,_0: a};
    };
-   var cyberneticImplants = Upgrade(_L.fromArray([ClickPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                     3000,
-                                                                                                                     $Santa$Model$Product.metal)
-                                                                                                                     ,A2($Santa$Model$Stackable.stack,
-                                                                                                                     3000,
-                                                                                                                     $Santa$Model$Product.oil)
-                                                                                                                     ,A2($Santa$Model$Stackable.stack,
-                                                                                                                     1000,
-                                                                                                                     $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Cybernetic Implants")($Basics.identity({_: {}})))));
-   var robotics = Upgrade(_L.fromArray([A2(ProducerPower,
-                                       $Santa$Model$Producer.microchipFactory,
-                                       1)
-                                       ,Unlock(cyberneticImplants)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                        300,
-                                                                                                                        $Santa$Model$Product.oil)
-                                                                                                                        ,A2($Santa$Model$Stackable.stack,
-                                                                                                                        100,
-                                                                                                                        $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Robotics")($Basics.identity({_: {}})))));
+   var roboticArms = Upgrade(_L.fromArray([ClickPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                              300,
+                                                                                                              $Santa$Model$Product.metal)
+                                                                                                              ,A2($Santa$Model$Stackable.stack,
+                                                                                                              300,
+                                                                                                              $Santa$Model$Product.oil)
+                                                                                                              ,A2($Santa$Model$Stackable.stack,
+                                                                                                              100,
+                                                                                                              $Santa$Model$Product.spirit)]))(researchable(2 * $Time.hour)($Santa$Common.Named("Robotic Arms")($Basics.identity({_: {}})))));
    var microchips = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.microchipFactory)
                                          ,UnlockProducer($Santa$Model$Producer.computerFactory)
                                          ,UnlockProducer($Santa$Model$Producer.gameConsoleFactory)
                                          ,UnlockProducer($Santa$Model$Producer.highTechToyWrapper)
-                                         ,Unlock(robotics)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                300,
-                                                                                                                $Santa$Model$Product.oil)
-                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                100,
-                                                                                                                $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Integrated Circuits")($Basics.identity({_: {}})))));
-   var electricity = Upgrade(_L.fromArray([ResearchPower(0.2)
-                                          ,Unlock(batteryPower)
-                                          ,Unlock(microchips)
-                                          ,Unlock(fracking)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                 300,
-                                                                                                                 $Santa$Model$Product.wood)
-                                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                                 300,
-                                                                                                                 $Santa$Model$Product.metal)
-                                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                                 100,
-                                                                                                                 $Santa$Model$Product.oil)
-                                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                                 100,
-                                                                                                                 $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Electricity")($Basics.identity({_: {}})))));
-   var fossilFuel = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.oilRig)
-                                         ,UnlockProducer($Santa$Model$Producer.advancedToyWrapper)
-                                         ,Unlock(plastics)
-                                         ,Unlock(electricity)
-                                         ,Unlock(aviation)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                300,
-                                                                                                                $Santa$Model$Product.wood)
-                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                300,
-                                                                                                                $Santa$Model$Product.metal)
-                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                100,
-                                                                                                                $Santa$Model$Product.oil)
-                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                10,
-                                                                                                                $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Fossil Fuel")($Basics.identity({_: {}})))));
-   var scientificMethod = Upgrade(_L.fromArray([ResearchPower(0.2)
-                                               ,Unlock(fossilFuel)
-                                               ,Unlock(heavyMachinery)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                            10,
-                                                                                                                            $Santa$Model$Product.wood)
-                                                                                                                            ,A2($Santa$Model$Stackable.stack,
-                                                                                                                            10,
-                                                                                                                            $Santa$Model$Product.metal)
-                                                                                                                            ,A2($Santa$Model$Stackable.stack,
-                                                                                                                            10,
-                                                                                                                            $Santa$Model$Product.oil)]))(researchable(10 * $Time.second)($Santa$Common.Named("Scientific Method")($Basics.identity({_: {}})))));
+                                         ,Unlock(roboticArms)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                                   300,
+                                                                                                                   $Santa$Model$Product.oil)
+                                                                                                                   ,A2($Santa$Model$Stackable.stack,
+                                                                                                                   100,
+                                                                                                                   $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Integrated Circuits")($Basics.identity({_: {}})))));
+   var advancedTechnology = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.oilRig)
+                                                 ,UnlockProducer($Santa$Model$Producer.advancedToyWrapper)
+                                                 ,Unlock(plastics)
+                                                 ,Unlock(batteries)
+                                                 ,Unlock(microchips)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                                          300,
+                                                                                                                          $Santa$Model$Product.wood)
+                                                                                                                          ,A2($Santa$Model$Stackable.stack,
+                                                                                                                          300,
+                                                                                                                          $Santa$Model$Product.metal)
+                                                                                                                          ,A2($Santa$Model$Stackable.stack,
+                                                                                                                          100,
+                                                                                                                          $Santa$Model$Product.oil)
+                                                                                                                          ,A2($Santa$Model$Stackable.stack,
+                                                                                                                          10,
+                                                                                                                          $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Advanced Technology")($Basics.identity({_: {}})))));
    var manufacturing = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.metalCarFactory)
-                                            ,Unlock(scientificMethod)
-                                            ,Unlock(recycling)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                    10,
-                                                                                                                    $Santa$Model$Product.wood)
-                                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                                    10,
-                                                                                                                    $Santa$Model$Product.metal)]))(researchable(10 * $Time.second)($Santa$Common.Named("Manufacturing")($Basics.identity({_: {}})))));
+                                            ,Unlock(advancedTechnology)
+                                            ,Unlock(scientificMethod)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+   10,
+   $Santa$Model$Product.metal)]))(researchable(10 * $Time.second)($Santa$Common.Named("Manufacturing")($Basics.identity({_: {}})))));
    var mining = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.miner)
                                      ,Unlock(manufacturing)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    5,
    $Santa$Model$Product.metal)]))(researchable(5 * $Time.second)($Santa$Common.Named("Mining")($Basics.identity({_: {}})))));
-   var manualLabor = Upgrade(_L.fromArray([ClickPower(3)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   300,
-   $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Manual Labor")($Basics.identity({_: {}})))));
-   var bodyBuilding = Upgrade(_L.fromArray([A2(ProducerPower,
-                                           $Santa$Model$Producer.lumberjack,
-                                           1)
-                                           ,Unlock(chainsaws)
-                                           ,Unlock(manualLabor)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                     30,
-                                                                                                                     $Santa$Model$Product.wood)
-                                                                                                                     ,A2($Santa$Model$Stackable.stack,
-                                                                                                                     10,
-                                                                                                                     $Santa$Model$Product.spirit)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Body-building")($Basics.identity({_: {}})))));
-   var telepathy = Upgrade(_L.fromArray([ClickPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   5000,
-   $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Telepathy")($Basics.identity({_: {}})))));
-   var occultism = Upgrade(_L.fromArray([ClickPower(3)
-                                        ,ResearchPower(0.2)
-                                        ,Unlock(telepathy)
-                                        ,Unlock(spiritsOfOurAncestors)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   500,
-   $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Occultism")($Basics.identity({_: {}})))));
-   var naturalOrder = Upgrade(_L.fromArray([ClickPower(1)
-                                           ,Unlock(occultism)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                   20,
-                                                                                                                   $Santa$Model$Product.wood)
-                                                                                                                   ,A2($Santa$Model$Stackable.stack,
-                                                                                                                   20,
-                                                                                                                   $Santa$Model$Product.metal)]))(researchable(1 * $Time.minute)($Santa$Common.Named("Natural Order")($Basics.identity({_: {}})))));
+   var naturalOrder = Upgrade(_L.fromArray([ClickPower(1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                                                                               20,
+                                                                                                               $Santa$Model$Product.wood)
+                                                                                                               ,A2($Santa$Model$Stackable.stack,
+                                                                                                               20,
+                                                                                                               $Santa$Model$Product.metal)]))(researchable(1 * $Time.minute)($Santa$Common.Named("Natural Order")($Basics.identity({_: {}})))));
    var woodworking = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.woodenToyMaker)
                                           ,Unlock(naturalOrder)
                                           ,Unlock(papermaking)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
@@ -12549,7 +12354,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    var forestry = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.lumberjack)
                                        ,Unlock(woodworking)
                                        ,Unlock(reindeerFarm)
-                                       ,Unlock(bodyBuilding)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                       ,Unlock(chainsaws)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    5,
    $Santa$Model$Product.wood)]))(researchable(5 * $Time.second)($Santa$Common.Named("Forestry")($Basics.identity({_: {}})))));
    var availableUnlockables = function (current) {
@@ -12614,116 +12419,18 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                         ,mining: mining
                                         ,manufacturing: manufacturing
                                         ,scientificMethod: scientificMethod
-                                        ,fossilFuel: fossilFuel
-                                        ,electricity: electricity
-                                        ,fracking: fracking
-                                        ,recycling: recycling
-                                        ,assemblyLine: assemblyLine
+                                        ,advancedTechnology: advancedTechnology
                                         ,plastics: plastics
-                                        ,batteryPower: batteryPower
+                                        ,batteries: batteries
                                         ,microchips: microchips
-                                        ,robotics: robotics
-                                        ,cyberneticImplants: cyberneticImplants
-                                        ,bodyBuilding: bodyBuilding
-                                        ,manualLabor: manualLabor
+                                        ,roboticArms: roboticArms
                                         ,chainsaws: chainsaws
-                                        ,rainForestDeregulation: rainForestDeregulation
-                                        ,heavyMachinery: heavyMachinery
-                                        ,goldRush: goldRush
-                                        ,nuclearPoweredDrills: nuclearPoweredDrills
                                         ,woodworking: woodworking
                                         ,naturalOrder: naturalOrder
-                                        ,occultism: occultism
-                                        ,telepathy: telepathy
                                         ,papermaking: papermaking
                                         ,reindeerFarm: reindeerFarm
-                                        ,redNosePaint: redNosePaint
-                                        ,aviation: aviation
-                                        ,globalPositioningSystem: globalPositioningSystem
-                                        ,spiritsOfTheForest: spiritsOfTheForest
-                                        ,spiritsOfTheEarth: spiritsOfTheEarth
-                                        ,spiritsOfOurAncestors: spiritsOfOurAncestors};
+                                        ,spiritsOfTheForest: spiritsOfTheForest};
    return _elm.Santa.Model.Unlockable.values;
-};
-Elm.Santa = Elm.Santa || {};
-Elm.Santa.View = Elm.Santa.View || {};
-Elm.Santa.View.Changelog = Elm.Santa.View.Changelog || {};
-Elm.Santa.View.Changelog.make = function (_elm) {
-   "use strict";
-   _elm.Santa = _elm.Santa || {};
-   _elm.Santa.View = _elm.Santa.View || {};
-   _elm.Santa.View.Changelog = _elm.Santa.View.Changelog || {};
-   if (_elm.Santa.View.Changelog.values)
-   return _elm.Santa.View.Changelog.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
-   $moduleName = "Santa.View.Changelog",
-   $Basics = Elm.Basics.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $List = Elm.List.make(_elm);
-   var versionString = function (_v0) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple3":
-            return A2($Basics._op["++"],
-              $Basics.toString(_v0._0),
-              A2($Basics._op["++"],
-              ".",
-              A2($Basics._op["++"],
-              $Basics.toString(_v0._1),
-              A2($Basics._op["++"],
-              ".",
-              $Basics.toString(_v0._2)))));}
-         _U.badCase($moduleName,
-         "on line 25, column 27 to 79");
-      }();
-   };
-   var changelogs = _L.fromArray([{_: {}
-                                  ,changes: _L.fromArray(["Initial release."])
-                                  ,version: {ctor: "_Tuple3"
-                                            ,_0: 0
-                                            ,_1: 1
-                                            ,_2: 0}}]);
-   var displayVersion = $Html.text(A2($Basics._op["++"],
-   "Version ",
-   versionString(function (_) {
-      return _.version;
-   }($List.head(changelogs)))));
-   var display = function () {
-      var displayOne = function (changelog) {
-         return A2($Html.div,
-         _L.fromArray([]),
-         _L.fromArray([A2($Html.u,
-                      _L.fromArray([]),
-                      _L.fromArray([$Html.text(versionString(changelog.version))]))
-                      ,$Html.ul(_L.fromArray([]))(A2($List.map,
-                      function (x) {
-                         return A2($Html.li,
-                         _L.fromArray([]),
-                         _L.fromArray([$Html.text(x)]));
-                      },
-                      changelog.changes))]));
-      };
-      return $Html.div(_L.fromArray([]))(A2($List.map,
-      displayOne,
-      changelogs));
-   }();
-   var Changelog = F2(function (a,
-   b) {
-      return {_: {}
-             ,changes: b
-             ,version: a};
-   });
-   _elm.Santa.View.Changelog.values = {_op: _op
-                                      ,Changelog: Changelog
-                                      ,changelogs: changelogs
-                                      ,versionString: versionString
-                                      ,displayVersion: displayVersion
-                                      ,display: display};
-   return _elm.Santa.View.Changelog.values;
 };
 Elm.Santa = Elm.Santa || {};
 Elm.Santa.View = Elm.Santa.View || {};
@@ -12855,7 +12562,6 @@ Elm.Santa.View.View.make = function (_elm) {
    $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
    $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
    $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
-   $Santa$View$Changelog = Elm.Santa.View.Changelog.make(_elm),
    $Santa$View$Stats = Elm.Santa.View.Stats.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $String = Elm.String.make(_elm);
@@ -13065,7 +12771,7 @@ Elm.Santa.View.View.make = function (_elm) {
                {case "_Tuple2":
                   return _v5._0.wrapped;}
                _U.badCase($moduleName,
-               "on line 446, column 36 to 45");
+               "on line 445, column 36 to 45");
             }();
          },
          products);
@@ -13083,7 +12789,7 @@ Elm.Santa.View.View.make = function (_elm) {
                {case "_Tuple2":
                   return $Basics.not(_v9._0.wrapped) && _v9._0.wrappable;}
                _U.badCase($moduleName,
-               "on line 453, column 36 to 64");
+               "on line 452, column 36 to 64");
             }();
          },
          products);
@@ -13108,7 +12814,7 @@ Elm.Santa.View.View.make = function (_elm) {
                {case "_Tuple2":
                   return $Basics.not(_v13._0.wrapped) && ($Basics.not(_v13._0.wrappable) && notBasic(_v13._0));}
                _U.badCase($moduleName,
-               "on line 461, column 36 to 82");
+               "on line 460, column 36 to 82");
             }();
          },
          products);
@@ -13136,7 +12842,7 @@ Elm.Santa.View.View.make = function (_elm) {
                     "x ",
                     _v17._0.name));}
                _U.badCase($moduleName,
-               "on line 55, column 40 to 68");
+               "on line 54, column 40 to 68");
             }();
          }($)));
       },
@@ -13181,7 +12887,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                         ,$Html.text("➜")
                                         ,displayProducts($function._1)])))]));}
          _U.badCase($moduleName,
-         "between lines 104 and 132");
+         "between lines 103 and 131");
       }();
    };
    var displayPurchasableProducer = F4(function (purchaseMultiplier,
@@ -13536,7 +13242,9 @@ Elm.Santa.View.View.make = function (_elm) {
                                                           _L.fromArray([$Html.text("http://www.inconspicuous.no")]))]))
                                              ,A2($Html.div,
                                              _L.fromArray([$Html$Attributes.$class("col-sm-6 text-right")]),
-                                             _L.fromArray([$Santa$View$Changelog.displayVersion
+                                             _L.fromArray([A2($Html.a,
+                                                          _L.fromArray([$Html$Attributes.href("#")]),
+                                                          _L.fromArray([$Html.text("Version 0.0.2")]))
                                                           ,$Html.text(" | ")
                                                           ,A2($Html.a,
                                                           _L.fromArray([$Html$Attributes.href("https://github.com/yuhe00/santas-workshop")]),

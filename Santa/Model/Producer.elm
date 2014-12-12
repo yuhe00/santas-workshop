@@ -207,7 +207,7 @@ toyWrapper
 
 advancedToyWrapper
     = identity {}
-    |> Named "Boxed Toy Wrapper"
+    |> Named "Advanced Toy Wrapper"
     |> Purchasable [ stack 3 Product.spirit ]
     |> Functional
         [ Transformer
@@ -237,14 +237,3 @@ reindeer
     |> Purchasable [ stack 5 Product.spirit ]
     |> Functional
         [ Deliverer 3 ]
-
-airplane
-    = identity {}
-    |> Named "Airplane"
-    |> Purchasable
-        [ stack 10 Product.metal
-        , stack 10 Product.oil
-        , stack 10 Product.spirit
-        ]
-    |> Functional
-        [ Deliverer 10 ]
