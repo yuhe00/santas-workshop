@@ -48,10 +48,9 @@ description bonuses =
                 products = map fst ps
                 totals = map (\x -> foldr (+) 0 <| map (\(y, n) -> if y.name == x.name then n else 1) ps) products
                 display x n =
-                    "Increases the efficiency of " ++ x.name ++ " by " ++ formatPct n ++ "."
+                    Just <| "Increases the efficiency of " ++ x.name ++ " by " ++ formatPct n ++ "."
             in
-                if | isEmpty ps -> Nothing
-                   | otherwise -> Just <| String.concat <| map2 display products totals
+                map2 display products totals
         unlockedProducers =
             let check bonus =
                     case bonus of
@@ -75,7 +74,8 @@ description bonuses =
     in
         filterMap identity <| concat
             [ powers
-            , [ producerPowers, unlockedProducers, unlockeds ]
+            , producerPowers
+            , [ unlockedProducers, unlockeds ]
             ]
 
 availableUnlockables : List Unlockable -> List (Purchasable Unlockable)

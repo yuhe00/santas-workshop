@@ -11956,7 +11956,6 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    $Santa$Model$Product = Elm.Santa.Model.Product.make(_elm),
    $Santa$Model$Purchasable = Elm.Santa.Model.Purchasable.make(_elm),
    $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
-   $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm);
    var producerPower$ = function (bonus) {
       return function () {
@@ -12109,7 +12108,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
          var producerPowers = function () {
             var display = F2(function (x,
             n) {
-               return A2($Basics._op["++"],
+               return $Maybe.Just(A2($Basics._op["++"],
                "Increases the efficiency of ",
                A2($Basics._op["++"],
                x.name,
@@ -12117,7 +12116,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                " by ",
                A2($Basics._op["++"],
                formatPct(n),
-               "."))));
+               ".")))));
             });
             var ps = A2($List.filterMap,
             producerPower$,
@@ -12145,10 +12144,10 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                ps));
             },
             products);
-            return $List.isEmpty(ps) ? $Maybe.Nothing : $Maybe.Just($String.concat(A3($List.map2,
+            return A3($List.map2,
             display,
             products,
-            totals)));
+            totals);
          }();
          var formatPower = F3(function ($function,
          displayFunction,
@@ -12206,8 +12205,8 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                           "."));
                        }}]));
          return $List.filterMap($Basics.identity)($List.concat(_L.fromArray([powers
-                                                                            ,_L.fromArray([producerPowers
-                                                                                          ,unlockedProducers
+                                                                            ,producerPowers
+                                                                            ,_L.fromArray([unlockedProducers
                                                                                           ,unlockeds])])));
       }();
    };
