@@ -8,7 +8,7 @@ import Html.Attributes (..)
 import Html.Events (..)
 import Html.Lazy as Ref
 
-import Santa.Common (BigNumber)
+import Santa.Common (..)
 import Santa.Model.Purchasable as Purchasable
 import Santa.Model.Purchasable (Purchasable)
 import Santa.Model.Stackable as Stackable
@@ -22,6 +22,7 @@ import Santa.Model.Producer (Producer)
 import Santa.Model.Unlockable as Unlockable
 import Santa.Model.Unlockable (Unlockable)
 import Santa.View.Stats as Stats
+import Santa.View.Changelog as Changelog
 import Santa.Controller.Controller (..)
 
 -- VIEW
@@ -522,7 +523,7 @@ display state =
                         ]
                     , div
                         [ class "col-sm-6 text-right" ]
-                        [ a [ href "#" ] [ text "Version 0.0.2" ]
+                        [ Changelog.displayVersion
                         , text " | "
                         , a [ href "https://github.com/yuhe00/santas-workshop" ] [ text "Source @ GitHub" ]
                         , text " | "
