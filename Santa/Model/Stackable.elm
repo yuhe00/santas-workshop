@@ -13,7 +13,7 @@ count : a -> List (Stackable a) -> BigNumber
 count n ns =
     case filter (\x -> fst x == n) ns of
         found::[] -> snd found
-        [] -> 0
+        _ -> 0
 
 update : a -> BigNumber -> List (Stackable a) -> List (Stackable a)
 update s delta products =

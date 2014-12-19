@@ -2,6 +2,7 @@ module Santa.View.Stats where
 
 import List (..)
 import String
+import Signal
 import Html (..)
 import Html.Attributes (..)
 import Html.Events (..)
@@ -50,4 +51,13 @@ display state =
     in
         div
             [ class "panel-body" ]
-            [ dl [ class "dl-horizontal" ] <| concatMap format stats ]
+            [ dl [ class "dl-horizontal" ] <| concatMap format stats
+            , div
+                [ class "text-center" ]
+                [ button
+                    [ class "btn btn-default"
+                    , onClick (Signal.send requestChannel ("Are you sure? (WARNING: This will delete your current progress!)", Reset))
+                    ]
+                    [ text "Reset Save" ]
+                ]
+            ]

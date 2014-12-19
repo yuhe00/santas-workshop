@@ -10409,13 +10409,34 @@ Elm.Santa.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
    $Keyboard = Elm.Keyboard.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
    $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
+   $Santa$Controller$Persistence = Elm.Santa.Controller.Persistence.make(_elm),
    $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
    $Santa$View$View = Elm.Santa.View.View.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var confirmDialog = _P.portIn("confirmDialog",
+   _P.incomingSignal(function (v) {
+      return typeof v === "boolean" ? v : _U.badPort("a boolean (true or false)",
+      v);
+   }));
+   var requestDialog = _P.portOut("requestDialog",
+   _P.outgoingSignal(function (v) {
+      return v;
+   }),
+   A2($Signal._op["<~"],
+   $Basics.fst,
+   $Signal.subscribe($Santa$Controller$Controller.requestChannel)));
+   var getStorage = _P.portIn("getStorage",
+   function (v) {
+      return v === null ? Elm.Maybe.make(_elm).Nothing : Elm.Maybe.make(_elm).Just(typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",
+      v));
+   });
    var scene = F2(function (state,
    _v0) {
       return function () {
@@ -10426,9 +10447,20 @@ Elm.Santa.make = function (_elm) {
               _v0._1,
               $Santa$View$View.display(state));}
          _U.badCase($moduleName,
-         "on line 54, column 22 to 50");
+         "on line 68, column 22 to 55");
       }();
    });
+   var startingState = function () {
+      switch (getStorage.ctor)
+      {case "Just":
+         return $Maybe.withDefault($Santa$Model$State.startState)($Result.toMaybe(A2($Json$Decode.decodeString,
+           $Santa$Controller$Persistence.decode,
+           getStorage._0)));
+         case "Nothing":
+         return $Santa$Model$State.startState;}
+      _U.badCase($moduleName,
+      "between lines 48 and 50");
+   }();
    var updateResearchSignal = A2($Signal._op["<~"],
    $Santa$Controller$Controller.UpdateResearch,
    $Time.fps(1));
@@ -10454,10 +10486,20 @@ Elm.Santa.make = function (_elm) {
                                  ,updateProductionSignal
                                  ,updateDeliveriesSignal
                                  ,updateResearchSignal
-                                 ,setPurchaseMultiplierSignal]);
+                                 ,setPurchaseMultiplierSignal
+                                 ,A2($Signal.sampleOn,
+                                 A3($Signal.keepIf,
+                                 function (x) {
+                                    return _U.eq(x,true);
+                                 },
+                                 false,
+                                 confirmDialog),
+                                 A2($Signal._op["<~"],
+                                 $Basics.snd,
+                                 $Signal.subscribe($Santa$Controller$Controller.requestChannel)))]);
       return A2($Signal.foldp,
       $Santa$Controller$Controller.step,
-      $Santa$Model$State.startState)($Signal.mergeMany(signals));
+      startingState)($Signal.mergeMany(signals));
    }();
    var showNotification = _P.portOut("showNotification",
    _P.outgoingSignal(function (v) {
@@ -10470,6 +10512,15 @@ Elm.Santa.make = function (_elm) {
       return _.notifications;
    },
    state)));
+   var setStorage = _P.portOut("setStorage",
+   _P.outgoingSignal(function (v) {
+      return v;
+   }),
+   A2($Signal.sampleOn,
+   $Time.every(1 * $Time.second),
+   A2($Signal._op["<~"],
+   $Santa$Controller$Persistence.encode,
+   state)));
    var main = A2($Signal._op["~"],
    A2($Signal._op["<~"],
    scene,
@@ -10480,6 +10531,7 @@ Elm.Santa.make = function (_elm) {
                        ,updateProductionSignal: updateProductionSignal
                        ,updateDeliveriesSignal: updateDeliveriesSignal
                        ,updateResearchSignal: updateResearchSignal
+                       ,startingState: startingState
                        ,state: state
                        ,scene: scene
                        ,main: main};
@@ -10498,7 +10550,26 @@ Elm.Santa.Common.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _P = _N.Ports.make(_elm),
-   $moduleName = "Santa.Common";
+   $moduleName = "Santa.Common",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var find = F2(function (name,
+   xs) {
+      return function () {
+         var _v0 = A2($List.filter,
+         function (x) {
+            return _U.eq(x.name,name);
+         },
+         xs);
+         switch (_v0.ctor)
+         {case "::": switch (_v0._1.ctor)
+              {case "[]":
+                 return $Maybe.Just(_v0._0);}
+              break;}
+         return $Maybe.Nothing;
+      }();
+   });
    var Descriptive = F2(function (a,
    b) {
       return _U.insert("description",
@@ -10510,7 +10581,8 @@ Elm.Santa.Common.make = function (_elm) {
    });
    _elm.Santa.Common.values = {_op: _op
                               ,Named: Named
-                              ,Descriptive: Descriptive};
+                              ,Descriptive: Descriptive
+                              ,find: find};
    return _elm.Santa.Common.values;
 };
 Elm.Santa = Elm.Santa || {};
@@ -10547,9 +10619,7 @@ Elm.Santa.Controller.Controller.make = function (_elm) {
          state);
          var state$$ = function () {
             switch (action.ctor)
-            {case "Anything":
-               return action._0(state$);
-               case "Create":
+            {case "Create":
                return function () {
                     var amount = $Basics.round($Santa$Model$Unlockable.clickPower(state$.unlockables));
                     return _U.replace([["products"
@@ -10574,6 +10644,8 @@ Elm.Santa.Controller.Controller.make = function (_elm) {
                return A2($Santa$Model$State.researchUnlockable,
                  action._0,
                  state$);
+               case "Reset":
+               return $Santa$Model$State.defaultStartState;
                case "SelectTab":
                return _U.replace([["selectedTab"
                                   ,action._0]],
@@ -10607,10 +10679,7 @@ Elm.Santa.Controller.Controller.make = function (_elm) {
          return $Santa$Model$State.updateAchievements(state$$);
       }();
    });
-   var Anything = function (a) {
-      return {ctor: "Anything"
-             ,_0: a};
-   };
+   var Reset = {ctor: "Reset"};
    var SelectTab = function (a) {
       return {ctor: "SelectTab"
              ,_0: a};
@@ -10656,6 +10725,9 @@ Elm.Santa.Controller.Controller.make = function (_elm) {
    var NoOp = {ctor: "NoOp"};
    var actionChannel = $Signal.channel(NoOp);
    var actionSignal = $Signal.subscribe(actionChannel);
+   var requestChannel = $Signal.channel({ctor: "_Tuple2"
+                                        ,_0: ""
+                                        ,_1: NoOp});
    _elm.Santa.Controller.Controller.values = {_op: _op
                                              ,NoOp: NoOp
                                              ,UpdateProduction: UpdateProduction
@@ -10669,11 +10741,304 @@ Elm.Santa.Controller.Controller.make = function (_elm) {
                                              ,Research: Research
                                              ,SetPurchaseMultiplier: SetPurchaseMultiplier
                                              ,SelectTab: SelectTab
-                                             ,Anything: Anything
+                                             ,Reset: Reset
                                              ,step: step
                                              ,actionChannel: actionChannel
-                                             ,actionSignal: actionSignal};
+                                             ,actionSignal: actionSignal
+                                             ,requestChannel: requestChannel};
    return _elm.Santa.Controller.Controller.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.Controller = Elm.Santa.Controller || {};
+Elm.Santa.Controller.Persistence = Elm.Santa.Controller.Persistence || {};
+Elm.Santa.Controller.Persistence.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.Controller = _elm.Santa.Controller || {};
+   _elm.Santa.Controller.Persistence = _elm.Santa.Controller.Persistence || {};
+   if (_elm.Santa.Controller.Persistence.values)
+   return _elm.Santa.Controller.Persistence.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.Controller.Persistence",
+   $Basics = Elm.Basics.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Santa$Common = Elm.Santa.Common.make(_elm),
+   $Santa$Model$Producer = Elm.Santa.Model.Producer.make(_elm),
+   $Santa$Model$Product = Elm.Santa.Model.Product.make(_elm),
+   $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
+   $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
+   $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm);
+   var encode = function (state) {
+      return function () {
+         var encodeAchievement = function (x) {
+            return $Json$Encode.string(x.name);
+         };
+         var encodeUnlockable = function (x) {
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "unlockable"
+                                                     ,_1: $Json$Encode.string(x.name)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "progressTimer"
+                                                     ,_1: $Json$Encode.$float(x.progressTimer)}]));
+         };
+         var encodeProducer = function (_v0) {
+            return function () {
+               switch (_v0.ctor)
+               {case "_Tuple2":
+                  return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                           ,_0: "producer"
+                                                           ,_1: $Json$Encode.string(_v0._0.name)}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "amount"
+                                                           ,_1: $Json$Encode.$int(_v0._1)}]));}
+               _U.badCase($moduleName,
+               "between lines 78 and 81");
+            }();
+         };
+         var encodeProduct = function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                           ,_0: "product"
+                                                           ,_1: $Json$Encode.string(_v4._0.name)}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "amount"
+                                                           ,_1: $Json$Encode.$int(_v4._1)}]));}
+               _U.badCase($moduleName,
+               "between lines 73 and 76");
+            }();
+         };
+         var value = $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                       ,_0: "deliveries"
+                                                       ,_1: $Json$Encode.$int(state.deliveries)}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "dps"
+                                                       ,_1: $Json$Encode.$int(state.dps)}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "timePlayed"
+                                                       ,_1: $Json$Encode.$float(state.timePlayed)}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "products"
+                                                       ,_1: $Json$Encode.list(A2($List.map,
+                                                       encodeProduct,
+                                                       state.products))}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "producers"
+                                                       ,_1: $Json$Encode.list(A2($List.map,
+                                                       encodeProducer,
+                                                       state.producers))}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "unlockables"
+                                                       ,_1: $Json$Encode.list(A2($List.map,
+                                                       encodeUnlockable,
+                                                       state.unlockables))}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "achievements"
+                                                       ,_1: $Json$Encode.list(A2($List.map,
+                                                       encodeAchievement,
+                                                       state.achievements))}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "uniqueProductsProduced"
+                                                       ,_1: $Json$Encode.list(A2($List.map,
+                                                       function ($) {
+                                                          return $Json$Encode.string(function (_) {
+                                                             return _.name;
+                                                          }($));
+                                                       },
+                                                       state.uniqueProductsProduced))}]));
+         return A2($Json$Encode.encode,
+         0,
+         value);
+      }();
+   };
+   var decode = function () {
+      var toSingleProduct = function (name) {
+         return A2($Santa$Common.find,
+         name,
+         $Santa$Model$Product.products);
+      };
+      var toAchievement = function (name) {
+         return A2($Santa$Common.find,
+         name,
+         $Santa$Model$State.achievements);
+      };
+      var toUnlockable = function (_v8) {
+         return function () {
+            switch (_v8.ctor)
+            {case "_Tuple2":
+               return function () {
+                    var _v12 = A2($Santa$Common.find,
+                    _v8._0,
+                    $Santa$Model$Unlockable.unlockables);
+                    switch (_v12.ctor)
+                    {case "Just":
+                       return $Maybe.Just(function (y) {
+                            return _U.replace([["progressTimer"
+                                               ,_v8._1]],
+                            y);
+                         }(_U.remove("cost",_v12._0)));
+                       case "Nothing":
+                       return $Maybe.Nothing;}
+                    _U.badCase($moduleName,
+                    "between lines 42 and 45");
+                 }();}
+            _U.badCase($moduleName,
+            "between lines 42 and 45");
+         }();
+      };
+      var toProducer = function (_v14) {
+         return function () {
+            switch (_v14.ctor)
+            {case "_Tuple2":
+               return function () {
+                    var _v18 = A2($Santa$Common.find,
+                    _v14._0,
+                    $Santa$Model$Producer.producers);
+                    switch (_v18.ctor)
+                    {case "Just":
+                       return $Maybe.Just(A2($Santa$Model$Stackable.stack,
+                         _v14._1,
+                         _U.remove("cost",_v18._0)));
+                       case "Nothing":
+                       return $Maybe.Nothing;}
+                    _U.badCase($moduleName,
+                    "between lines 38 and 41");
+                 }();}
+            _U.badCase($moduleName,
+            "between lines 38 and 41");
+         }();
+      };
+      var toProduct = function (_v20) {
+         return function () {
+            switch (_v20.ctor)
+            {case "_Tuple2":
+               return function () {
+                    var _v24 = A2($Santa$Common.find,
+                    _v20._0,
+                    $Santa$Model$Product.products);
+                    switch (_v24.ctor)
+                    {case "Just":
+                       return $Maybe.Just(A2($Santa$Model$Stackable.stack,
+                         _v20._1,
+                         _v24._0));
+                       case "Nothing":
+                       return $Maybe.Nothing;}
+                    _U.badCase($moduleName,
+                    "between lines 34 and 37");
+                 }();}
+            _U.badCase($moduleName,
+            "between lines 34 and 37");
+         }();
+      };
+      var decodeState = F8(function (deliveries,
+      dps,
+      timePlayed,
+      products,
+      producers,
+      unlockables,
+      achievements,
+      uniqueProductsProduced) {
+         return _U.replace([["deliveries"
+                            ,deliveries]
+                           ,["dps",dps]
+                           ,["timePlayed",timePlayed]
+                           ,["products"
+                            ,A2($List.filterMap,
+                            toProduct,
+                            products)]
+                           ,["producers"
+                            ,A2($List.filterMap,
+                            toProducer,
+                            producers)]
+                           ,["unlockables"
+                            ,A2($List.filterMap,
+                            toUnlockable,
+                            unlockables)]
+                           ,["achievements"
+                            ,A2($List.filterMap,
+                            toAchievement,
+                            achievements)]
+                           ,["uniqueProductsProduced"
+                            ,A2($List.filterMap,
+                            toSingleProduct,
+                            uniqueProductsProduced)]],
+         $Santa$Model$State.defaultStartState);
+      });
+      var decodeUnlockable = A3($Json$Decode.object2,
+      F2(function (v0,v1) {
+         return {ctor: "_Tuple2"
+                ,_0: v0
+                ,_1: v1};
+      }),
+      A2($Json$Decode._op[":="],
+      "unlockable",
+      $Json$Decode.string),
+      A2($Json$Decode._op[":="],
+      "progressTimer",
+      $Json$Decode.$float));
+      var decodeProducer = A3($Json$Decode.object2,
+      F2(function (v0,v1) {
+         return {ctor: "_Tuple2"
+                ,_0: v0
+                ,_1: v1};
+      }),
+      A2($Json$Decode._op[":="],
+      "producer",
+      $Json$Decode.string),
+      A2($Json$Decode._op[":="],
+      "amount",
+      $Json$Decode.$int));
+      var decodeProduct = A3($Json$Decode.object2,
+      F2(function (v0,v1) {
+         return {ctor: "_Tuple2"
+                ,_0: v0
+                ,_1: v1};
+      }),
+      A2($Json$Decode._op[":="],
+      "product",
+      $Json$Decode.string),
+      A2($Json$Decode._op[":="],
+      "amount",
+      $Json$Decode.$int));
+      return A9($Json$Decode.object8,
+      decodeState,
+      A2($Json$Decode._op[":="],
+      "deliveries",
+      $Json$Decode.$int),
+      A2($Json$Decode._op[":="],
+      "dps",
+      $Json$Decode.$int),
+      A2($Json$Decode._op[":="],
+      "timePlayed",
+      $Json$Decode.$float),
+      A2($Json$Decode._op[":="],
+      "products",
+      $Json$Decode.list(decodeProduct)),
+      A2($Json$Decode._op[":="],
+      "producers",
+      $Json$Decode.list(decodeProducer)),
+      A2($Json$Decode._op[":="],
+      "unlockables",
+      $Json$Decode.list(decodeUnlockable)),
+      A2($Json$Decode._op[":="],
+      "achievements",
+      $Json$Decode.list($Json$Decode.string)),
+      A2($Json$Decode._op[":="],
+      "uniqueProductsProduced",
+      $Json$Decode.list($Json$Decode.string)));
+   }();
+   _elm.Santa.Controller.Persistence.values = {_op: _op
+                                              ,decode: decode
+                                              ,encode: encode};
+   return _elm.Santa.Controller.Persistence.values;
 };
 Elm.Santa = Elm.Santa || {};
 Elm.Santa.Model = Elm.Santa.Model || {};
@@ -11129,6 +11494,25 @@ Elm.Santa.Model.Producer.make = function (_elm) {
    $Santa$Model$Product.spirit)]))]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
    1,
    $Santa$Model$Product.spirit)]))($Santa$Common.Named("Santa\'s Little Helper")($Basics.identity({_: {}}))));
+   var producers = _L.fromArray([lumberjack
+                                ,miner
+                                ,oilRig
+                                ,santasLittleHelper
+                                ,woodenToyMaker
+                                ,metalCarFactory
+                                ,plasticFactory
+                                ,batteryFactory
+                                ,microchipFactory
+                                ,legoFactory
+                                ,rcCarFactory
+                                ,computerFactory
+                                ,gameConsoleFactory
+                                ,paperFactory
+                                ,toyWrapper
+                                ,advancedToyWrapper
+                                ,highTechToyWrapper
+                                ,reindeer
+                                ,airplane]);
    _elm.Santa.Model.Producer.values = {_op: _op
                                       ,Creator: Creator
                                       ,Transformer: Transformer
@@ -11157,7 +11541,8 @@ Elm.Santa.Model.Producer.make = function (_elm) {
                                       ,advancedToyWrapper: advancedToyWrapper
                                       ,highTechToyWrapper: highTechToyWrapper
                                       ,reindeer: reindeer
-                                      ,airplane: airplane};
+                                      ,airplane: airplane
+                                      ,producers: producers};
    return _elm.Santa.Model.Producer.values;
 };
 Elm.Santa = Elm.Santa || {};
@@ -11189,6 +11574,12 @@ Elm.Santa.Model.Product.make = function (_elm) {
    var rcCar = $Santa$Common.Named("RC Car")(wrappable);
    var gameConsole = $Santa$Common.Named("Game Console")(wrappable);
    var computer = $Santa$Common.Named("PC")(wrappable);
+   var presents = _L.fromArray([woodenToy
+                               ,metalCar
+                               ,legos
+                               ,rcCar
+                               ,gameConsole
+                               ,computer]);
    var consumable = {_: {}
                     ,wrappable: false
                     ,wrapped: false};
@@ -11196,7 +11587,6 @@ Elm.Santa.Model.Product.make = function (_elm) {
                                                                     ,true]],
    consumable));
    var spirit = $Santa$Common.Named("Christmas Spirit")(consumable);
-   var santasBlessing = $Santa$Common.Named("Santa\'s Blessing")(consumable);
    var wood = $Santa$Common.Named("Wood")(consumable);
    var metal = $Santa$Common.Named("Metal")(consumable);
    var oil = $Santa$Common.Named("Oil")(consumable);
@@ -11214,6 +11604,11 @@ Elm.Santa.Model.Product.make = function (_elm) {
    var consumables = A2($Basics._op["++"],
    basics,
    parts);
+   var products = A2($Basics._op["++"],
+   _L.fromArray([wrapped,spirit]),
+   A2($Basics._op["++"],
+   consumables,
+   presents));
    var wrap = F3(function (product,
    amount,
    products) {
@@ -11247,7 +11642,6 @@ Elm.Santa.Model.Product.make = function (_elm) {
                                      ,wrappable: wrappable
                                      ,wrapped: wrapped
                                      ,spirit: spirit
-                                     ,santasBlessing: santasBlessing
                                      ,wood: wood
                                      ,metal: metal
                                      ,oil: oil
@@ -11263,7 +11657,9 @@ Elm.Santa.Model.Product.make = function (_elm) {
                                      ,legos: legos
                                      ,rcCar: rcCar
                                      ,gameConsole: gameConsole
-                                     ,computer: computer};
+                                     ,computer: computer
+                                     ,presents: presents
+                                     ,products: products};
    return _elm.Santa.Model.Product.values;
 };
 Elm.Santa = Elm.Santa || {};
@@ -11451,10 +11847,8 @@ Elm.Santa.Model.Stackable.make = function (_elm) {
          {case "::": switch (_v8._1.ctor)
               {case "[]":
                  return $Basics.snd(_v8._0);}
-              break;
-            case "[]": return 0;}
-         _U.badCase($moduleName,
-         "between lines 14 and 16");
+              break;}
+         return 0;
       }();
    });
    var stack = F2(function (amount,
@@ -11734,6 +12128,13 @@ Elm.Santa.Model.State.make = function (_elm) {
                                            1) > -1;
                                         })]))($Santa$Common.Descriptive("Produce a PC.")($Santa$Common.Named("High-Tech Enterprise")($Basics.identity({_: {}}))))
                                         ,Conditional(_L.fromArray([Condition(function (x) {
+                                           return _U.cmp(A2($Santa$Model$Stackable.count,
+                                           _U.remove("cost",
+                                           $Santa$Model$Producer.oilRig),
+                                           x.producers),
+                                           1) > -1;
+                                        })]))($Santa$Common.Descriptive("Construct an Oil Rig.")($Santa$Common.Named("North Pole, Alaska")($Basics.identity({_: {}}))))
+                                        ,Conditional(_L.fromArray([Condition(function (x) {
                                            return _U.cmp($List.length(x.uniqueProductsProduced),
                                            2) > -1;
                                         })]))($Santa$Common.Descriptive("Produce 2 different types of presents.")($Santa$Common.Named("Dualism")($Basics.identity({_: {}}))))
@@ -11957,6 +12358,20 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    $Santa$Model$Purchasable = Elm.Santa.Model.Purchasable.make(_elm),
    $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
    $Time = Elm.Time.make(_elm);
+   var costTier = F2(function (tier,
+   products) {
+      return function () {
+         var b = Math.pow(10,
+         tier + 1);
+         var t = $List.length(products);
+         return _U.eq(tier,
+         0) ? A2($List.map,
+         $Santa$Model$Stackable.stack(b / t | 0),
+         products) : A2($List.map,
+         $Santa$Model$Stackable.stack(1),
+         products);
+      }();
+   });
    var producerPower$ = function (bonus) {
       return function () {
          switch (bonus.ctor)
@@ -12238,17 +12653,17 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    };
    var plastics = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.plasticFactory)
                                        ,UnlockProducer($Santa$Model$Producer.legoFactory)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                                               300,
+                                                                                                                                               5000,
                                                                                                                                                $Santa$Model$Product.oil)
                                                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                                               100,
+                                                                                                                                               5000,
                                                                                                                                                $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Plastics")($Basics.identity({_: {}})))));
    var batteryPower = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.batteryFactory)
                                            ,UnlockProducer($Santa$Model$Producer.rcCarFactory)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                                                    300,
+                                                                                                                                                    30000,
                                                                                                                                                     $Santa$Model$Product.oil)
                                                                                                                                                     ,A2($Santa$Model$Stackable.stack,
-                                                                                                                                                    100,
+                                                                                                                                                    10000,
                                                                                                                                                     $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Battery Power")($Basics.identity({_: {}})))));
    var papermaking = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.paperFactory)
                                           ,UnlockProducer($Santa$Model$Producer.toyWrapper)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
@@ -12263,22 +12678,36 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
              ,_0: a
              ,_1: b};
    });
+   var offshorePlatform = Upgrade(_L.fromArray([A2(ProducerPower,
+   $Santa$Model$Producer.oilRig,
+   5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
+                                                           30000,
+                                                           $Santa$Model$Product.wood)
+                                                           ,A2($Santa$Model$Stackable.stack,
+                                                           30000,
+                                                           $Santa$Model$Product.metal)
+                                                           ,A2($Santa$Model$Stackable.stack,
+                                                           30000,
+                                                           $Santa$Model$Product.oil)
+                                                           ,A2($Santa$Model$Stackable.stack,
+                                                           10000,
+                                                           $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Offshore Platforms")($Basics.identity({_: {}})))));
    var recycling = Upgrade(_L.fromArray([A2(ProducerPower,
                                         $Santa$Model$Producer.woodenToyMaker,
                                         1)
                                         ,A2(ProducerPower,
                                         $Santa$Model$Producer.metalCarFactory,
                                         1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                300,
+                                                                                                3000,
                                                                                                 $Santa$Model$Product.wood)
                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                300,
+                                                                                                3000,
                                                                                                 $Santa$Model$Product.metal)
                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                100,
+                                                                                                1000,
                                                                                                 $Santa$Model$Product.oil)
                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                100,
+                                                                                                1000,
                                                                                                 $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Recycling")($Basics.identity({_: {}})))));
    var assemblyLine = Upgrade(_L.fromArray([A2(ProducerPower,
                                            $Santa$Model$Producer.rcCarFactory,
@@ -12286,16 +12715,16 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                            ,A2(ProducerPower,
                                            $Santa$Model$Producer.legoFactory,
                                            1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                   3000,
+                                                                                                   30000,
                                                                                                    $Santa$Model$Product.wood)
                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                   3000,
+                                                                                                   30000,
                                                                                                    $Santa$Model$Product.metal)
                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                   1000,
+                                                                                                   10000,
                                                                                                    $Santa$Model$Product.oil)
                                                                                                    ,A2($Santa$Model$Stackable.stack,
-                                                                                                   1000,
+                                                                                                   10000,
                                                                                                    $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Assembly Line")($Basics.identity({_: {}})))));
    var rainForestDeregulation = Upgrade(_L.fromArray([A2(ProducerPower,
    $Santa$Model$Producer.lumberjack,
@@ -12306,50 +12735,50 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                         $Santa$Model$Producer.lumberjack,
                                         3)
                                         ,Unlock(rainForestDeregulation)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                             150,
+                                                                                                                             1500,
                                                                                                                              $Santa$Model$Product.metal)
                                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             150,
+                                                                                                                             1500,
                                                                                                                              $Santa$Model$Product.oil)
                                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             100,
+                                                                                                                             1000,
                                                                                                                              $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Chainsaws")($Basics.identity({_: {}})))));
    var nuclearPoweredDrills = Upgrade(_L.fromArray([A2(ProducerPower,
    $Santa$Model$Producer.miner,
    5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                           3000,
+                                                           30000,
                                                            $Santa$Model$Product.metal)
                                                            ,A2($Santa$Model$Stackable.stack,
-                                                           1000,
+                                                           10000,
                                                            $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Nuclear-powered Drills")($Basics.identity({_: {}})))));
    var goldRush = Upgrade(_L.fromArray([A2(ProducerPower,
                                        $Santa$Model$Producer.miner,
                                        3)
                                        ,Unlock(nuclearPoweredDrills)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                          300,
+                                                                                                                          3000,
                                                                                                                           $Santa$Model$Product.metal)
                                                                                                                           ,A2($Santa$Model$Stackable.stack,
-                                                                                                                          100,
+                                                                                                                          1000,
                                                                                                                           $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Gold Rush!")($Basics.identity({_: {}})))));
    var heavyMachinery = Upgrade(_L.fromArray([A2(ProducerPower,
                                              $Santa$Model$Producer.miner,
                                              1)
                                              ,Unlock(goldRush)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                    30,
+                                                                                                                    300,
                                                                                                                     $Santa$Model$Product.metal)
                                                                                                                     ,A2($Santa$Model$Stackable.stack,
-                                                                                                                    10,
+                                                                                                                    100,
                                                                                                                     $Santa$Model$Product.spirit)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Heavy Machinery")($Basics.identity({_: {}})))));
    var redNosePaint = Upgrade(_L.fromArray([A2(ProducerPower,
    $Santa$Model$Producer.reindeer,
    1)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                           100,
+                                                           1000,
                                                            $Santa$Model$Product.wood)
                                                            ,A2($Santa$Model$Stackable.stack,
-                                                           100,
+                                                           1000,
                                                            $Santa$Model$Product.metal)
                                                            ,A2($Santa$Model$Stackable.stack,
-                                                           100,
+                                                           1000,
                                                            $Santa$Model$Product.spirit)]))(researchable(10 * $Time.minute)($Santa$Common.Named("Red Nose-paint")($Basics.identity({_: {}})))));
    var globalPositioningSystem = Upgrade(_L.fromArray([A2(ProducerPower,
                                                       $Santa$Model$Producer.reindeer,
@@ -12357,29 +12786,29 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                       ,A2(ProducerPower,
                                                       $Santa$Model$Producer.airplane,
                                                       2)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
+                                                                                                              30000,
                                                                                                               $Santa$Model$Product.wood)
                                                                                                               ,A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
+                                                                                                              30000,
                                                                                                               $Santa$Model$Product.metal)
                                                                                                               ,A2($Santa$Model$Stackable.stack,
-                                                                                                              3000,
+                                                                                                              30000,
                                                                                                               $Santa$Model$Product.oil)
                                                                                                               ,A2($Santa$Model$Stackable.stack,
-                                                                                                              1000,
+                                                                                                              10000,
                                                                                                               $Santa$Model$Product.spirit)]))(researchable(24 * $Time.hour)($Santa$Common.Named("Global Positioning System")($Basics.identity({_: {}})))));
    var aviation = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.airplane)
                                        ,Unlock(globalPositioningSystem)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
+                                                                                                                             3000,
                                                                                                                              $Santa$Model$Product.wood)
                                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
+                                                                                                                             3000,
                                                                                                                              $Santa$Model$Product.metal)
                                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             300,
+                                                                                                                             3000,
                                                                                                                              $Santa$Model$Product.oil)
                                                                                                                              ,A2($Santa$Model$Stackable.stack,
-                                                                                                                             100,
+                                                                                                                             1000,
                                                                                                                              $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Aviation")($Basics.identity({_: {}})))));
    var ResearchPower = function (a) {
       return {ctor: "ResearchPower"
@@ -12403,26 +12832,26 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                                                                                             10,
                                                                                                                             $Santa$Model$Product.spirit)]))(researchable(1 * $Time.minute)($Santa$Common.Named("Reindeer Farm")($Basics.identity({_: {}})))));
    var spiritsOfTheEarth = Upgrade(_L.fromArray([SpiritPower(3)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   1000,
+   10000,
    $Santa$Model$Product.metal)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Spirits of the Earth")($Basics.identity({_: {}})))));
    var fracking = Upgrade(_L.fromArray([A2(ProducerPower,
                                        $Santa$Model$Producer.oilRig,
-                                       5)
+                                       3)
                                        ,Unlock(spiritsOfTheEarth)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
+                                                                                                                       30000,
                                                                                                                        $Santa$Model$Product.wood)
                                                                                                                        ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
+                                                                                                                       30000,
                                                                                                                        $Santa$Model$Product.metal)
                                                                                                                        ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       3000,
+                                                                                                                       30000,
                                                                                                                        $Santa$Model$Product.oil)
                                                                                                                        ,A2($Santa$Model$Stackable.stack,
-                                                                                                                       1000,
-                                                                                                                       $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Hydrofracking")($Basics.identity({_: {}})))));
+                                                                                                                       10000,
+                                                                                                                       $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Hydrofracking")($Basics.identity({_: {}})))));
    var spiritsOfOurAncestors = Upgrade(_L.fromArray([SpiritPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   10000,
-   $Santa$Model$Product.oil)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Spirits of our Ancestors")($Basics.identity({_: {}})))));
+   100000,
+   $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Spirits of our Ancestors")($Basics.identity({_: {}})))));
    var ClickPower = function (a) {
       return {ctor: "ClickPower"
              ,_0: a};
@@ -12440,20 +12869,20 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                        $Santa$Model$Producer.microchipFactory,
                                        1)
                                        ,Unlock(cyberneticImplants)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                        300,
+                                                                                                                        30000,
                                                                                                                         $Santa$Model$Product.oil)
                                                                                                                         ,A2($Santa$Model$Stackable.stack,
-                                                                                                                        100,
+                                                                                                                        10000,
                                                                                                                         $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Robotics")($Basics.identity({_: {}})))));
    var microchips = Upgrade(_L.fromArray([UnlockProducer($Santa$Model$Producer.microchipFactory)
                                          ,UnlockProducer($Santa$Model$Producer.computerFactory)
                                          ,UnlockProducer($Santa$Model$Producer.gameConsoleFactory)
                                          ,UnlockProducer($Santa$Model$Producer.highTechToyWrapper)
                                          ,Unlock(robotics)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-                                                                                                                300,
+                                                                                                                30000,
                                                                                                                 $Santa$Model$Product.oil)
                                                                                                                 ,A2($Santa$Model$Stackable.stack,
-                                                                                                                100,
+                                                                                                                10000,
                                                                                                                 $Santa$Model$Product.spirit)]))(researchable(1 * $Time.hour)($Santa$Common.Named("Integrated Circuits")($Basics.identity({_: {}})))));
    var electricity = Upgrade(_L.fromArray([ResearchPower(0.2)
                                           ,Unlock(batteryPower)
@@ -12482,9 +12911,6 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                                                                                 $Santa$Model$Product.metal)
                                                                                                                 ,A2($Santa$Model$Stackable.stack,
                                                                                                                 100,
-                                                                                                                $Santa$Model$Product.oil)
-                                                                                                                ,A2($Santa$Model$Stackable.stack,
-                                                                                                                10,
                                                                                                                 $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Fossil Fuel")($Basics.identity({_: {}})))));
    var scientificMethod = Upgrade(_L.fromArray([ResearchPower(0.2)
                                                ,Unlock(fossilFuel)
@@ -12510,7 +12936,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
    5,
    $Santa$Model$Product.metal)]))(researchable(5 * $Time.second)($Santa$Common.Named("Mining")($Basics.identity({_: {}})))));
    var manualLabor = Upgrade(_L.fromArray([ClickPower(3)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   300,
+   1000,
    $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Manual Labor")($Basics.identity({_: {}})))));
    var bodyBuilding = Upgrade(_L.fromArray([A2(ProducerPower,
                                            $Santa$Model$Producer.lumberjack,
@@ -12523,13 +12949,13 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                                                                                                      10,
                                                                                                                      $Santa$Model$Product.spirit)]))(researchable(3 * $Time.minute)($Santa$Common.Named("Body-building")($Basics.identity({_: {}})))));
    var telepathy = Upgrade(_L.fromArray([ClickPower(5)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   5000,
+   50000,
    $Santa$Model$Product.spirit)]))(researchable(3 * $Time.hour)($Santa$Common.Named("Telepathy")($Basics.identity({_: {}})))));
    var occultism = Upgrade(_L.fromArray([ClickPower(3)
                                         ,ResearchPower(0.2)
                                         ,Unlock(telepathy)
                                         ,Unlock(spiritsOfOurAncestors)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
-   500,
+   5000,
    $Santa$Model$Product.spirit)]))(researchable(30 * $Time.minute)($Santa$Common.Named("Occultism")($Basics.identity({_: {}})))));
    var naturalOrder = Upgrade(_L.fromArray([ClickPower(1)
                                            ,Unlock(occultism)]))($Santa$Model$Purchasable.Purchasable(_L.fromArray([A2($Santa$Model$Stackable.stack,
@@ -12588,6 +13014,40 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
          available));
       }();
    };
+   var unlockables = _L.fromArray([forestry
+                                  ,mining
+                                  ,manufacturing
+                                  ,scientificMethod
+                                  ,fossilFuel
+                                  ,electricity
+                                  ,fracking
+                                  ,offshorePlatform
+                                  ,recycling
+                                  ,assemblyLine
+                                  ,plastics
+                                  ,batteryPower
+                                  ,microchips
+                                  ,robotics
+                                  ,cyberneticImplants
+                                  ,bodyBuilding
+                                  ,manualLabor
+                                  ,chainsaws
+                                  ,rainForestDeregulation
+                                  ,heavyMachinery
+                                  ,goldRush
+                                  ,nuclearPoweredDrills
+                                  ,woodworking
+                                  ,naturalOrder
+                                  ,occultism
+                                  ,telepathy
+                                  ,papermaking
+                                  ,reindeerFarm
+                                  ,redNosePaint
+                                  ,aviation
+                                  ,globalPositioningSystem
+                                  ,spiritsOfTheForest
+                                  ,spiritsOfTheEarth
+                                  ,spiritsOfOurAncestors]);
    _elm.Santa.Model.Unlockable.values = {_op: _op
                                         ,ClickPower: ClickPower
                                         ,SpiritPower: SpiritPower
@@ -12617,6 +13077,7 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                         ,fossilFuel: fossilFuel
                                         ,electricity: electricity
                                         ,fracking: fracking
+                                        ,offshorePlatform: offshorePlatform
                                         ,recycling: recycling
                                         ,assemblyLine: assemblyLine
                                         ,plastics: plastics
@@ -12642,8 +13103,59 @@ Elm.Santa.Model.Unlockable.make = function (_elm) {
                                         ,globalPositioningSystem: globalPositioningSystem
                                         ,spiritsOfTheForest: spiritsOfTheForest
                                         ,spiritsOfTheEarth: spiritsOfTheEarth
-                                        ,spiritsOfOurAncestors: spiritsOfOurAncestors};
+                                        ,spiritsOfOurAncestors: spiritsOfOurAncestors
+                                        ,costTier: costTier
+                                        ,unlockables: unlockables};
    return _elm.Santa.Model.Unlockable.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.View = Elm.Santa.View || {};
+Elm.Santa.View.Achievements = Elm.Santa.View.Achievements || {};
+Elm.Santa.View.Achievements.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.View = _elm.Santa.View || {};
+   _elm.Santa.View.Achievements = _elm.Santa.View.Achievements || {};
+   if (_elm.Santa.View.Achievements.values)
+   return _elm.Santa.View.Achievements.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.View.Achievements",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Santa$Model$State = Elm.Santa.Model.State.make(_elm);
+   var display = function (achievements) {
+      return function () {
+         var check = function (x) {
+            return A2($List.any,
+            function (y) {
+               return _U.eq(y.name,x.name);
+            },
+            achievements) ? _L.fromArray([A2($Html.div,
+            _L.fromArray([$Html$Attributes.$class("list-group-item active")]),
+            _L.fromArray([A2($Html.h4,
+                         _L.fromArray([$Html$Attributes.$class("list-group-item-heading")]),
+                         _L.fromArray([$Html.text(x.name)]))
+                         ,$Html.text(x.description)]))]) : _L.fromArray([A2($Html.div,
+            _L.fromArray([$Html$Attributes.$class("list-group-item")]),
+            _L.fromArray([A2($Html.h4,
+                         _L.fromArray([$Html$Attributes.$class("list-group-item-heading")]),
+                         _L.fromArray([$Html.text(x.name)]))
+                         ,$Html.text("LOCKED")]))]);
+         };
+         return $Html.div(_L.fromArray([$Html$Attributes.$class("list-group")]))($List.concat(A2($List.map,
+         check,
+         $Santa$Model$State.achievements)));
+      }();
+   };
+   _elm.Santa.View.Achievements.values = {_op: _op
+                                         ,display: display};
+   return _elm.Santa.View.Achievements.values;
 };
 Elm.Santa = Elm.Santa || {};
 Elm.Santa.View = Elm.Santa.View || {};
@@ -12678,10 +13190,19 @@ Elm.Santa.View.Changelog.make = function (_elm) {
               ".",
               $Basics.toString(_v0._2)))));}
          _U.badCase($moduleName,
-         "on line 25, column 27 to 79");
+         "on line 33, column 27 to 79");
       }();
    };
    var changelogs = _L.fromArray([{_: {}
+                                  ,changes: _L.fromArray(["Fixed some layout problems."
+                                                         ,"Content update and rebalanced some numbers."
+                                                         ,"Game state is now saved between sessions and can be reset."
+                                                         ,"Refactored and structured code."])
+                                  ,version: {ctor: "_Tuple3"
+                                            ,_0: 0
+                                            ,_1: 1
+                                            ,_2: 1}}
+                                 ,{_: {}
                                   ,changes: _L.fromArray(["Initial release."])
                                   ,version: {ctor: "_Tuple3"
                                             ,_0: 0
@@ -12727,126 +13248,25 @@ Elm.Santa.View.Changelog.make = function (_elm) {
 };
 Elm.Santa = Elm.Santa || {};
 Elm.Santa.View = Elm.Santa.View || {};
-Elm.Santa.View.Stats = Elm.Santa.View.Stats || {};
-Elm.Santa.View.Stats.make = function (_elm) {
+Elm.Santa.View.Producer = Elm.Santa.View.Producer || {};
+Elm.Santa.View.Producer.make = function (_elm) {
    "use strict";
    _elm.Santa = _elm.Santa || {};
    _elm.Santa.View = _elm.Santa.View || {};
-   _elm.Santa.View.Stats = _elm.Santa.View.Stats || {};
-   if (_elm.Santa.View.Stats.values)
-   return _elm.Santa.View.Stats.values;
+   _elm.Santa.View.Producer = _elm.Santa.View.Producer || {};
+   if (_elm.Santa.View.Producer.values)
+   return _elm.Santa.View.Producer.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    _P = _N.Ports.make(_elm),
-   $moduleName = "Santa.View.Stats",
-   $Basics = Elm.Basics.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
-   $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var formatTime = function (time) {
-      return function () {
-         var h = $Basics.floor($Time.inHours(time));
-         var m = $Basics.floor($Time.inMinutes(time - $Basics.toFloat(h) * $Time.hour));
-         var s = $Basics.floor($Time.inSeconds(time - $Basics.toFloat(h) * $Time.hour - $Basics.toFloat(m) * $Time.minute));
-         return $String.concat(_L.fromArray([$Basics.toString(h)
-                                            ,"h "
-                                            ,$Basics.toString(m)
-                                            ,"m "
-                                            ,$Basics.toString(s)
-                                            ,"s"]));
-      }();
-   };
-   var display = function (state) {
-      return function () {
-         var format = function (_v0) {
-            return function () {
-               switch (_v0.ctor)
-               {case "_Tuple2":
-                  return _L.fromArray([A2($Html.dt,
-                                      _L.fromArray([]),
-                                      _L.fromArray([$Html.text(_v0._0)]))
-                                      ,A2($Html.dd,
-                                      _L.fromArray([]),
-                                      _L.fromArray([$Html.text(_v0._1)]))]);}
-               _U.badCase($moduleName,
-               "on line 49, column 25 to 63");
-            }();
-         };
-         var achievementsEarned = function () {
-            var ta = $List.length($Santa$Model$State.achievements);
-            var ca = $List.length(state.achievements);
-            var pct = $Basics.toString($Basics.round($Basics.toFloat(ca) / $Basics.toFloat(ta) * 100));
-            return A2($Basics._op["++"],
-            $Basics.toString(ca),
-            A2($Basics._op["++"],
-            "/",
-            A2($Basics._op["++"],
-            $Basics.toString(ta),
-            A2($Basics._op["++"],
-            " (",
-            A2($Basics._op["++"],
-            pct,
-            "%)")))));
-         }();
-         var stats = _L.fromArray([{ctor: "_Tuple2"
-                                   ,_0: "Time played"
-                                   ,_1: formatTime(state.timePlayed)}
-                                  ,{ctor: "_Tuple2"
-                                   ,_0: "Achievements earned"
-                                   ,_1: achievementsEarned}
-                                  ,{ctor: "_Tuple2"
-                                   ,_0: "Unique presents"
-                                   ,_1: $Basics.toString($List.length(state.uniqueProductsProduced))}
-                                  ,{ctor: "_Tuple2"
-                                   ,_0: "Click power"
-                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.clickPower(state.unlockables))}
-                                  ,{ctor: "_Tuple2"
-                                   ,_0: "Spirit multiplier"
-                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.spiritPower(state.unlockables))}
-                                  ,{ctor: "_Tuple2"
-                                   ,_0: "Research speed"
-                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.researchPower(state.unlockables))}]);
-         return A2($Html.div,
-         _L.fromArray([$Html$Attributes.$class("panel-body")]),
-         _L.fromArray([$Html.dl(_L.fromArray([$Html$Attributes.$class("dl-horizontal")]))(A2($List.concatMap,
-         format,
-         stats))]));
-      }();
-   };
-   _elm.Santa.View.Stats.values = {_op: _op
-                                  ,formatTime: formatTime
-                                  ,display: display};
-   return _elm.Santa.View.Stats.values;
-};
-Elm.Santa = Elm.Santa || {};
-Elm.Santa.View = Elm.Santa.View || {};
-Elm.Santa.View.View = Elm.Santa.View.View || {};
-Elm.Santa.View.View.make = function (_elm) {
-   "use strict";
-   _elm.Santa = _elm.Santa || {};
-   _elm.Santa.View = _elm.Santa.View || {};
-   _elm.Santa.View.View = _elm.Santa.View.View || {};
-   if (_elm.Santa.View.View.values)
-   return _elm.Santa.View.View.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
-   $moduleName = "Santa.View.View",
+   $moduleName = "Santa.View.Producer",
    $Basics = Elm.Basics.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
-   $Html$Lazy = Elm.Html.Lazy.make(_elm),
    $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
    $Santa$Common = Elm.Santa.Common.make(_elm),
    $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
    $Santa$Model$Producer = Elm.Santa.Model.Producer.make(_elm),
@@ -12855,293 +13275,8 @@ Elm.Santa.View.View.make = function (_elm) {
    $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
    $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
    $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
-   $Santa$View$Changelog = Elm.Santa.View.Changelog.make(_elm),
-   $Santa$View$Stats = Elm.Santa.View.Stats.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var displayAchievements = function (achievements) {
-      return function () {
-         var check = function (x) {
-            return A2($List.any,
-            function (y) {
-               return _U.eq(y.name,x.name);
-            },
-            achievements) ? _L.fromArray([A2($Html.div,
-            _L.fromArray([$Html$Attributes.$class("list-group-item active")]),
-            _L.fromArray([A2($Html.h4,
-                         _L.fromArray([$Html$Attributes.$class("list-group-item-heading")]),
-                         _L.fromArray([$Html.text(x.name)]))
-                         ,$Html.text(x.description)]))]) : _L.fromArray([A2($Html.div,
-            _L.fromArray([$Html$Attributes.$class("list-group-item")]),
-            _L.fromArray([A2($Html.h4,
-                         _L.fromArray([$Html$Attributes.$class("list-group-item-heading")]),
-                         _L.fromArray([$Html.text(x.name)]))
-                         ,$Html.text("LOCKED")]))]);
-         };
-         return $Html.div(_L.fromArray([$Html$Attributes.$class("list-group")]))($List.concat(A2($List.map,
-         check,
-         $Santa$Model$State.achievements)));
-      }();
-   };
-   var displayNavigation = function (state) {
-      return function () {
-         var displayTab = function (x) {
-            return function () {
-               var icon = function () {
-                  switch (x.ctor)
-                  {case "Achievements":
-                     return "star";
-                     case "Research": return "book";
-                     case "Stats": return "stats";
-                     case "Workshop": return "cog";}
-                  return "align-left";
-               }();
-               var navigationClass = _U.eq(x,
-               state.selectedTab) ? "active" : "";
-               return A2($Html.li,
-               _L.fromArray([$Html$Attributes.$class(navigationClass)]),
-               _L.fromArray([A2($Html.a,
-               _L.fromArray([$Html$Attributes.href("#")
-                            ,$Html$Events.onClick(A2($Signal.send,
-                            $Santa$Controller$Controller.actionChannel,
-                            $Santa$Controller$Controller.SelectTab(x)))]),
-               _L.fromArray([A2($Html.span,
-                            _L.fromArray([$Html$Attributes.$class(A2($Basics._op["++"],
-                                         "glyphicon glyphicon-",
-                                         icon))
-                                         ,A2($Html$Attributes.stringProperty,
-                                         "aria-hidden",
-                                         "true")
-                                         ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                               ,_0: "padding-right"
-                                                                               ,_1: "0.5em"}]))]),
-                            _L.fromArray([]))
-                            ,$Html.text($Basics.toString(x))]))]));
-            }();
-         };
-         return A2($Html.nav,
-         _L.fromArray([$Html$Attributes.$class("navbar navbar-default")
-                      ,A2($Html$Attributes.stringProperty,
-                      "role",
-                      "navigation")]),
-         _L.fromArray([$Html.ul(_L.fromArray([$Html$Attributes.$class("nav navbar-nav")]))(A2($List.map,
-         displayTab,
-         _L.fromArray([$Santa$Model$State.Workshop
-                      ,$Santa$Model$State.Research
-                      ,$Santa$Model$State.Stats
-                      ,$Santa$Model$State.Achievements])))]));
-      }();
-   };
-   var primaryResources = function (products) {
-      return function () {
-         var actionButton = F2(function (p,
-         t) {
-            return function () {
-               var amount = $Basics.toString(A2($Santa$Model$Stackable.count,
-               p,
-               products));
-               return A2($Html.div,
-               _L.fromArray([$Html$Attributes.$class("col-centered text-center primaryResources")]),
-               _L.fromArray([A2($Html.div,
-                            _L.fromArray([]),
-                            _L.fromArray([A2($Html.a,
-                            _L.fromArray([$Html$Attributes.href("#")
-                                         ,$Html$Attributes.$class("hovertext")
-                                         ,$Html$Attributes.title(amount)]),
-                            _L.fromArray([A2($Html.img,
-                            _L.fromArray([$Html$Attributes.src(A2($Basics._op["++"],
-                            "files/",
-                            A2($Basics._op["++"],
-                            $String.toLower(p.name),
-                            ".png")))]),
-                            _L.fromArray([]))]))]))
-                            ,A2($Html.div,
-                            _L.fromArray([]),
-                            _L.fromArray([A2($Html.button,
-                            _L.fromArray([$Html$Attributes.$class("btn btn-default")
-                                         ,$Html$Events.onClick(A2($Signal.send,
-                                         $Santa$Controller$Controller.actionChannel,
-                                         $Santa$Controller$Controller.Create(p)))]),
-                            _L.fromArray([$Html.text(t)]))]))]));
-            }();
-         });
-         return $Html.div(_L.fromArray([$Html$Attributes.$class("row row-centered")]))($List.map($Basics.uncurry(actionButton))(_L.fromArray([{ctor: "_Tuple2"
-                                                                                                                                              ,_0: $Santa$Model$Product.wood
-                                                                                                                                              ,_1: "Cut Wood"}
-                                                                                                                                             ,{ctor: "_Tuple2"
-                                                                                                                                              ,_0: $Santa$Model$Product.metal
-                                                                                                                                              ,_1: "Mine Metal"}
-                                                                                                                                             ,{ctor: "_Tuple2"
-                                                                                                                                              ,_0: $Santa$Model$Product.oil
-                                                                                                                                              ,_1: "Pump Oil"}])));
-      }();
-   };
-   var displayTestButtons = function (products) {
-      return function () {
-         var actionButtonNoImage = F2(function (action,
-         t) {
-            return A2($Html.div,
-            _L.fromArray([$Html$Attributes.$class("col-centered")]),
-            _L.fromArray([A2($Html.button,
-            _L.fromArray([$Html$Attributes.$class("btn btn-default")
-                         ,$Html$Events.onClick(A2($Signal.send,
-                         $Santa$Controller$Controller.actionChannel,
-                         action))]),
-            _L.fromArray([$Html.text(t)]))]));
-         });
-         return A2($Html.div,
-         _L.fromArray([$Html$Attributes.$class("col-sm-12")]),
-         _L.fromArray([primaryResources(products)
-                      ,$Html.div(_L.fromArray([$Html$Attributes.$class("row row-centered")]))($List.map($Basics.uncurry(actionButtonNoImage))(_L.fromArray([{ctor: "_Tuple2"
-                                                                                                                                                            ,_0: $Santa$Controller$Controller.Create($Santa$Model$Product.woodenToy)
-                                                                                                                                                            ,_1: "Produce Wooden Toy"}
-                                                                                                                                                           ,{ctor: "_Tuple2"
-                                                                                                                                                            ,_0: $Santa$Controller$Controller.Create($Santa$Model$Product.wrappingPaper)
-                                                                                                                                                            ,_1: "Produce Wrapping Paper"}])))]));
-      }();
-   };
-   var displayProduct = function (product) {
-      return function () {
-         var $ = product,
-         p = $._0,
-         count = $._1;
-         var action = _U.eq(p,
-         $Santa$Model$Product.wrapped) ? $Maybe.Just({ctor: "_Tuple2"
-                                                     ,_0: $Santa$Controller$Controller.Deliver
-                                                     ,_1: "Deliver"}) : p.wrappable ? $Maybe.Just({ctor: "_Tuple2"
-                                                                                                  ,_0: $Santa$Controller$Controller.Wrap(p)
-                                                                                                  ,_1: "Wrap"}) : $Maybe.Nothing;
-         var button$ = function () {
-            switch (action.ctor)
-            {case "Just":
-               switch (action._0.ctor)
-                 {case "_Tuple2":
-                    return A2($Html.button,
-                      _L.fromArray([$Html$Attributes.$class("btn btn-default")
-                                   ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                         ,_0: "width"
-                                                                         ,_1: "10em"}]))
-                                   ,$Html$Events.onClick(A2($Signal.send,
-                                   $Santa$Controller$Controller.actionChannel,
-                                   action._0._0))]),
-                      _L.fromArray([$Html.text(action._0._1)]));}
-                 break;}
-            return $Html.text(" ");
-         }();
-         return A2($Html.tr,
-         _L.fromArray([]),
-         _L.fromArray([A2($Html.td,
-                      _L.fromArray([]),
-                      _L.fromArray([A2($Html.div,
-                      _L.fromArray([$Html$Attributes.$class("amount")]),
-                      _L.fromArray([$Html.text($Basics.toString(count))]))]))
-                      ,A2($Html.td,
-                      _L.fromArray([$Html$Attributes.$class("text-left")
-                                   ,A2($Html$Attributes.stringProperty,
-                                   "width",
-                                   "80%")]),
-                      _L.fromArray([$Html.text(p.name)]))
-                      ,A2($Html.td,
-                      _L.fromArray([$Html$Attributes.$class("text-center")
-                                   ,A2($Html$Attributes.stringProperty,
-                                   "width",
-                                   "20%")]),
-                      _L.fromArray([button$]))]));
-      }();
-   };
-   var displayProductList = function (products) {
-      return A2($Html.table,
-      _L.fromArray([$Html$Attributes.$class("table table-condensed")]),
-      _L.fromArray([$Html.tbody(_L.fromArray([]))(A2($List.map,
-      displayProduct,
-      products))]));
-   };
-   var displayReadyList = function (products) {
-      return function () {
-         var items = A2($List.filter,
-         function (_v5) {
-            return function () {
-               switch (_v5.ctor)
-               {case "_Tuple2":
-                  return _v5._0.wrapped;}
-               _U.badCase($moduleName,
-               "on line 446, column 36 to 45");
-            }();
-         },
-         products);
-         return $List.isEmpty(items) ? A2($Html.div,
-         _L.fromArray([$Html$Attributes.$class("panel-body")]),
-         _L.fromArray([$Html.text("Nothing")])) : displayProductList(items);
-      }();
-   };
-   var displayUnwrappedList = function (products) {
-      return function () {
-         var items = A2($List.filter,
-         function (_v9) {
-            return function () {
-               switch (_v9.ctor)
-               {case "_Tuple2":
-                  return $Basics.not(_v9._0.wrapped) && _v9._0.wrappable;}
-               _U.badCase($moduleName,
-               "on line 453, column 36 to 64");
-            }();
-         },
-         products);
-         return $List.isEmpty(items) ? A2($Html.div,
-         _L.fromArray([$Html$Attributes.$class("panel-body")]),
-         _L.fromArray([$Html.text("Nothing")])) : displayProductList(items);
-      }();
-   };
-   var displayConsumables = function (products) {
-      return function () {
-         var notBasic = function (x) {
-            return A2($List.all,
-            function (p) {
-               return !_U.eq(p.name,x.name);
-            },
-            $Santa$Model$Product.basics);
-         };
-         var items = A2($List.filter,
-         function (_v13) {
-            return function () {
-               switch (_v13.ctor)
-               {case "_Tuple2":
-                  return $Basics.not(_v13._0.wrapped) && ($Basics.not(_v13._0.wrappable) && notBasic(_v13._0));}
-               _U.badCase($moduleName,
-               "on line 461, column 36 to 82");
-            }();
-         },
-         products);
-         return $List.isEmpty(items) ? A2($Html.div,
-         _L.fromArray([$Html$Attributes.$class("panel-body")]),
-         _L.fromArray([$Html.text("Nothing")])) : displayProductList(items);
-      }();
-   };
-   var displayProducts = function (products) {
-      return A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([$Html.ul(_L.fromArray([]))(A2($List.map,
-      function ($) {
-         return function (x) {
-            return A2($Html.li,
-            _L.fromArray([]),
-            _L.fromArray([x]));
-         }($Html.text(function (_v17) {
-            return function () {
-               switch (_v17.ctor)
-               {case "_Tuple2":
-                  return A2($Basics._op["++"],
-                    $Basics.toString(_v17._1),
-                    A2($Basics._op["++"],
-                    "x ",
-                    _v17._0.name));}
-               _U.badCase($moduleName,
-               "on line 55, column 40 to 68");
-            }();
-         }($)));
-      },
-      products))]));
-   };
+   $Santa$View$Product = Elm.Santa.View.Product.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var displayProducerFunction = function ($function) {
       return function () {
          switch ($function.ctor)
@@ -13153,7 +13288,7 @@ Elm.Santa.View.View.make = function (_elm) {
                            _L.fromArray([$Html.text("Gathers (per second):")]))
                            ,A2($Html.div,
                            _L.fromArray([$Html$Attributes.$class("tooltipFunction")]),
-                           _L.fromArray([displayProducts($function._0)]))]));
+                           _L.fromArray([$Santa$View$Product.displayList($function._0)]))]));
             case "Deliverer":
             return A2($Html.div,
               _L.fromArray([]),
@@ -13177,14 +13312,14 @@ Elm.Santa.View.View.make = function (_elm) {
                               _L.fromArray([$Html$Attributes.$class("tooltipFunctionTransformer")]),
                               _L.fromArray([x]));
                            },
-                           _L.fromArray([displayProducts($function._0)
+                           _L.fromArray([$Santa$View$Product.displayList($function._0)
                                         ,$Html.text("➜")
-                                        ,displayProducts($function._1)])))]));}
+                                        ,$Santa$View$Product.displayList($function._1)])))]));}
          _U.badCase($moduleName,
-         "between lines 104 and 132");
+         "between lines 29 and 57");
       }();
    };
-   var displayPurchasableProducer = F4(function (purchaseMultiplier,
+   var display$ = F4(function (purchaseMultiplier,
    purchasableProducer,
    producers,
    products) {
@@ -13250,28 +13385,12 @@ Elm.Santa.View.View.make = function (_elm) {
                                    _L.fromArray([$Html.text(A2($Basics._op["++"],
                                    "Purchase",
                                    purchaseAmountText))]))
-                                   ,A2($Html.div,
-                                   _L.fromArray([]),
-                                   _L.fromArray([A2($Html.div,
-                                   _L.fromArray([$Html$Attributes.$class("tooltip text-left")]),
-                                   _L.fromArray([A2($Html.div,
-                                   _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                                      ,_0: "color"
-                                                                                      ,_1: costColor}
-                                                                                     ,{ctor: "_Tuple2"
-                                                                                      ,_0: "width"
-                                                                                      ,_1: "auto"}]))]),
-                                   _L.fromArray([A2($Html.em,
-                                                _L.fromArray([]),
-                                                _L.fromArray([$Html.text("Cost:")]))
-                                                ,A2($Html.div,
-                                                _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                                                   ,_0: "padding"
-                                                                                                   ,_1: "0.5em"}]))]),
-                                                _L.fromArray([displayProducts(cost)]))]))]))]))]))]))]));
+                                   ,A2($Santa$View$Product.costTooltip,
+                                   cost,
+                                   canAfford)]))]))]));
       }();
    });
-   var displayPurchasableProducers = F4(function (purchaseMultiplier,
+   var display = F4(function (purchaseMultiplier,
    producers,
    products,
    unlockables) {
@@ -13279,7 +13398,7 @@ Elm.Santa.View.View.make = function (_elm) {
          var ps = $Santa$Model$State.producers(unlockables);
          var items = A2($List.map,
          function (x) {
-            return A4(displayPurchasableProducer,
+            return A4(display$,
             purchaseMultiplier,
             x,
             producers,
@@ -13298,6 +13417,227 @@ Elm.Santa.View.View.make = function (_elm) {
          items)]));
       }();
    });
+   _elm.Santa.View.Producer.values = {_op: _op
+                                     ,displayProducerFunction: displayProducerFunction
+                                     ,display$: display$
+                                     ,display: display};
+   return _elm.Santa.View.Producer.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.View = Elm.Santa.View || {};
+Elm.Santa.View.Product = Elm.Santa.View.Product || {};
+Elm.Santa.View.Product.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.View = _elm.Santa.View || {};
+   _elm.Santa.View.Product = _elm.Santa.View.Product || {};
+   if (_elm.Santa.View.Product.values)
+   return _elm.Santa.View.Product.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.View.Product",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
+   $Santa$Model$Product = Elm.Santa.Model.Product.make(_elm),
+   $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var displayProduct = function (product) {
+      return function () {
+         var $ = product,
+         p = $._0,
+         count = $._1;
+         var action = _U.eq(p,
+         $Santa$Model$Product.wrapped) ? $Maybe.Just({ctor: "_Tuple2"
+                                                     ,_0: $Santa$Controller$Controller.Deliver
+                                                     ,_1: "Deliver"}) : p.wrappable ? $Maybe.Just({ctor: "_Tuple2"
+                                                                                                  ,_0: $Santa$Controller$Controller.Wrap(p)
+                                                                                                  ,_1: "Wrap"}) : $Maybe.Nothing;
+         var button$ = function () {
+            switch (action.ctor)
+            {case "Just":
+               switch (action._0.ctor)
+                 {case "_Tuple2":
+                    return A2($Html.button,
+                      _L.fromArray([$Html$Attributes.$class("btn btn-default")
+                                   ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                         ,_0: "width"
+                                                                         ,_1: "10em"}]))
+                                   ,$Html$Events.onClick(A2($Signal.send,
+                                   $Santa$Controller$Controller.actionChannel,
+                                   action._0._0))]),
+                      _L.fromArray([$Html.text(action._0._1)]));}
+                 break;}
+            return $Html.text(" ");
+         }();
+         return A2($Html.tr,
+         _L.fromArray([]),
+         _L.fromArray([A2($Html.td,
+                      _L.fromArray([A2($Html$Attributes.stringProperty,
+                      "width",
+                      "30%")]),
+                      _L.fromArray([A2($Html.div,
+                      _L.fromArray([$Html$Attributes.$class("amount")]),
+                      _L.fromArray([$Html.text($Basics.toString(count))]))]))
+                      ,A2($Html.td,
+                      _L.fromArray([$Html$Attributes.$class("text-left")
+                                   ,A2($Html$Attributes.stringProperty,
+                                   "width",
+                                   "50%")]),
+                      _L.fromArray([$Html.text(p.name)]))
+                      ,A2($Html.td,
+                      _L.fromArray([$Html$Attributes.$class("text-center")
+                                   ,A2($Html$Attributes.stringProperty,
+                                   "width",
+                                   "20%")]),
+                      _L.fromArray([button$]))]));
+      }();
+   };
+   var display = function (products) {
+      return A2($Html.table,
+      _L.fromArray([$Html$Attributes.$class("table table-condensed")]),
+      _L.fromArray([$Html.tbody(_L.fromArray([]))(A2($List.map,
+      displayProduct,
+      products))]));
+   };
+   var readyList = function (products) {
+      return function () {
+         var items = A2($List.filter,
+         function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return _v4._0.wrapped;}
+               _U.badCase($moduleName,
+               "on line 131, column 36 to 45");
+            }();
+         },
+         products);
+         return $List.isEmpty(items) ? A2($Html.div,
+         _L.fromArray([$Html$Attributes.$class("panel-body")]),
+         _L.fromArray([$Html.text("Nothing")])) : display(items);
+      }();
+   };
+   var unwrappedList = function (products) {
+      return function () {
+         var items = A2($List.filter,
+         function (_v8) {
+            return function () {
+               switch (_v8.ctor)
+               {case "_Tuple2":
+                  return $Basics.not(_v8._0.wrapped) && _v8._0.wrappable;}
+               _U.badCase($moduleName,
+               "on line 138, column 36 to 64");
+            }();
+         },
+         products);
+         return $List.isEmpty(items) ? A2($Html.div,
+         _L.fromArray([$Html$Attributes.$class("panel-body")]),
+         _L.fromArray([$Html.text("Nothing")])) : display(items);
+      }();
+   };
+   var consumables = function (products) {
+      return function () {
+         var notBasic = function (x) {
+            return A2($List.all,
+            function (p) {
+               return !_U.eq(p.name,x.name);
+            },
+            $Santa$Model$Product.basics);
+         };
+         var items = A2($List.filter,
+         function (_v12) {
+            return function () {
+               switch (_v12.ctor)
+               {case "_Tuple2":
+                  return $Basics.not(_v12._0.wrapped) && ($Basics.not(_v12._0.wrappable) && notBasic(_v12._0));}
+               _U.badCase($moduleName,
+               "on line 146, column 36 to 82");
+            }();
+         },
+         products);
+         return $List.isEmpty(items) ? A2($Html.div,
+         _L.fromArray([$Html$Attributes.$class("panel-body")]),
+         _L.fromArray([$Html.text("Nothing")])) : display(items);
+      }();
+   };
+   var primaryResources = function (products) {
+      return function () {
+         var actionButton = F2(function (p,
+         t) {
+            return function () {
+               var amount = $Basics.toString(A2($Santa$Model$Stackable.count,
+               p,
+               products));
+               return A2($Html.div,
+               _L.fromArray([$Html$Attributes.$class("col-centered text-center primaryResources")]),
+               _L.fromArray([A2($Html.div,
+                            _L.fromArray([]),
+                            _L.fromArray([A2($Html.a,
+                            _L.fromArray([$Html$Attributes.href("#")
+                                         ,$Html$Attributes.$class("hovertext")
+                                         ,$Html$Attributes.title(amount)]),
+                            _L.fromArray([A2($Html.img,
+                            _L.fromArray([$Html$Attributes.src(A2($Basics._op["++"],
+                            "files/",
+                            A2($Basics._op["++"],
+                            $String.toLower(p.name),
+                            ".png")))]),
+                            _L.fromArray([]))]))]))
+                            ,A2($Html.div,
+                            _L.fromArray([]),
+                            _L.fromArray([A2($Html.button,
+                            _L.fromArray([$Html$Attributes.$class("btn btn-default")
+                                         ,$Html$Events.onClick(A2($Signal.send,
+                                         $Santa$Controller$Controller.actionChannel,
+                                         $Santa$Controller$Controller.Create(p)))]),
+                            _L.fromArray([$Html.text(t)]))]))]));
+            }();
+         });
+         return $Html.div(_L.fromArray([$Html$Attributes.$class("row row-centered")]))($List.map($Basics.uncurry(actionButton))(_L.fromArray([{ctor: "_Tuple2"
+                                                                                                                                              ,_0: $Santa$Model$Product.wood
+                                                                                                                                              ,_1: "Cut Wood"}
+                                                                                                                                             ,{ctor: "_Tuple2"
+                                                                                                                                              ,_0: $Santa$Model$Product.metal
+                                                                                                                                              ,_1: "Mine Metal"}
+                                                                                                                                             ,{ctor: "_Tuple2"
+                                                                                                                                              ,_0: $Santa$Model$Product.oil
+                                                                                                                                              ,_1: "Pump Oil"}])));
+      }();
+   };
+   var displayList = function (products) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([$Html.ul(_L.fromArray([]))(A2($List.map,
+      function ($) {
+         return function (x) {
+            return A2($Html.li,
+            _L.fromArray([]),
+            _L.fromArray([x]));
+         }($Html.text(function (_v16) {
+            return function () {
+               switch (_v16.ctor)
+               {case "_Tuple2":
+                  return A2($Basics._op["++"],
+                    $Basics.toString(_v16._1),
+                    A2($Basics._op["++"],
+                    "x ",
+                    _v16._0.name));}
+               _U.badCase($moduleName,
+               "on line 22, column 40 to 68");
+            }();
+         }($)));
+      },
+      products))]));
+   };
    var costTooltip = F2(function (cost,
    canAfford) {
       return function () {
@@ -13318,10 +13658,49 @@ Elm.Santa.View.View.make = function (_elm) {
                       _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
                                                                          ,_0: "padding"
                                                                          ,_1: "0.5em"}]))]),
-                      _L.fromArray([displayProducts(cost)]))]))]));
+                      _L.fromArray([displayList(cost)]))]))]));
       }();
    });
-   var displayUnlockables = F2(function (unlockables,
+   _elm.Santa.View.Product.values = {_op: _op
+                                    ,displayList: displayList
+                                    ,costTooltip: costTooltip
+                                    ,primaryResources: primaryResources
+                                    ,displayProduct: displayProduct
+                                    ,display: display
+                                    ,readyList: readyList
+                                    ,unwrappedList: unwrappedList
+                                    ,consumables: consumables};
+   return _elm.Santa.View.Product.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.View = Elm.Santa.View || {};
+Elm.Santa.View.Research = Elm.Santa.View.Research || {};
+Elm.Santa.View.Research.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.View = _elm.Santa.View || {};
+   _elm.Santa.View.Research = _elm.Santa.View.Research || {};
+   if (_elm.Santa.View.Research.values)
+   return _elm.Santa.View.Research.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.View.Research",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
+   $Santa$Model$Product = Elm.Santa.Model.Product.make(_elm),
+   $Santa$Model$Purchasable = Elm.Santa.Model.Purchasable.make(_elm),
+   $Santa$Model$Stackable = Elm.Santa.Model.Stackable.make(_elm),
+   $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
+   $Santa$View$Product = Elm.Santa.View.Product.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var display = F2(function (unlockables,
    products) {
       return function () {
          var progressBar = function (pct) {
@@ -13360,7 +13739,7 @@ Elm.Santa.View.View.make = function (_elm) {
                _L.fromArray([$Html.text(label)]))]));
             }();
          };
-         var display = function (x) {
+         var single = function (x) {
             return function () {
                var canAfford = A2($Santa$Model$Purchasable.canAfford,
                x.cost,
@@ -13401,7 +13780,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                                       $Santa$Controller$Controller.actionChannel,
                                                       $Santa$Controller$Controller.Research(x)))]),
                                          _L.fromArray([$Html.text("Research")]))
-                                         ,A2(costTooltip,
+                                         ,A2($Santa$View$Product.costTooltip,
                                          x.cost,
                                          canAfford)]))]))]));
             }();
@@ -13409,21 +13788,170 @@ Elm.Santa.View.View.make = function (_elm) {
          return A2($Html.table,
          _L.fromArray([$Html$Attributes.$class("table")]),
          _L.fromArray([$Html.tbody(_L.fromArray([]))(A2($List.map,
-         display,
+         single,
          unlockables))]));
       }();
    });
-   var displaySelectedTab = function (state) {
+   _elm.Santa.View.Research.values = {_op: _op
+                                     ,display: display};
+   return _elm.Santa.View.Research.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.View = Elm.Santa.View || {};
+Elm.Santa.View.Stats = Elm.Santa.View.Stats || {};
+Elm.Santa.View.Stats.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.View = _elm.Santa.View || {};
+   _elm.Santa.View.Stats = _elm.Santa.View.Stats || {};
+   if (_elm.Santa.View.Stats.values)
+   return _elm.Santa.View.Stats.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.View.Stats",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
+   $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
+   $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var formatTime = function (time) {
       return function () {
-         var _v26 = state.selectedTab;
-         switch (_v26.ctor)
+         var h = $Basics.floor($Time.inHours(time));
+         var m = $Basics.floor($Time.inMinutes(time - $Basics.toFloat(h) * $Time.hour));
+         var s = $Basics.floor($Time.inSeconds(time - $Basics.toFloat(h) * $Time.hour - $Basics.toFloat(m) * $Time.minute));
+         return $String.concat(_L.fromArray([$Basics.toString(h)
+                                            ,"h "
+                                            ,$Basics.toString(m)
+                                            ,"m "
+                                            ,$Basics.toString(s)
+                                            ,"s"]));
+      }();
+   };
+   var display = function (state) {
+      return function () {
+         var format = function (_v0) {
+            return function () {
+               switch (_v0.ctor)
+               {case "_Tuple2":
+                  return _L.fromArray([A2($Html.dt,
+                                      _L.fromArray([]),
+                                      _L.fromArray([$Html.text(_v0._0)]))
+                                      ,A2($Html.dd,
+                                      _L.fromArray([]),
+                                      _L.fromArray([$Html.text(_v0._1)]))]);}
+               _U.badCase($moduleName,
+               "on line 50, column 25 to 63");
+            }();
+         };
+         var achievementsEarned = function () {
+            var ta = $List.length($Santa$Model$State.achievements);
+            var ca = $List.length(state.achievements);
+            var pct = $Basics.toString($Basics.round($Basics.toFloat(ca) / $Basics.toFloat(ta) * 100));
+            return A2($Basics._op["++"],
+            $Basics.toString(ca),
+            A2($Basics._op["++"],
+            "/",
+            A2($Basics._op["++"],
+            $Basics.toString(ta),
+            A2($Basics._op["++"],
+            " (",
+            A2($Basics._op["++"],
+            pct,
+            "%)")))));
+         }();
+         var stats = _L.fromArray([{ctor: "_Tuple2"
+                                   ,_0: "Time played"
+                                   ,_1: formatTime(state.timePlayed)}
+                                  ,{ctor: "_Tuple2"
+                                   ,_0: "Achievements earned"
+                                   ,_1: achievementsEarned}
+                                  ,{ctor: "_Tuple2"
+                                   ,_0: "Unique presents"
+                                   ,_1: $Basics.toString($List.length(state.uniqueProductsProduced))}
+                                  ,{ctor: "_Tuple2"
+                                   ,_0: "Click power"
+                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.clickPower(state.unlockables))}
+                                  ,{ctor: "_Tuple2"
+                                   ,_0: "Spirit multiplier"
+                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.spiritPower(state.unlockables))}
+                                  ,{ctor: "_Tuple2"
+                                   ,_0: "Research speed"
+                                   ,_1: $Santa$Model$Unlockable.formatPct($Santa$Model$Unlockable.researchPower(state.unlockables))}]);
+         return A2($Html.div,
+         _L.fromArray([$Html$Attributes.$class("panel-body")]),
+         _L.fromArray([$Html.dl(_L.fromArray([$Html$Attributes.$class("dl-horizontal")]))(A2($List.concatMap,
+                      format,
+                      stats))
+                      ,A2($Html.div,
+                      _L.fromArray([$Html$Attributes.$class("text-center")]),
+                      _L.fromArray([A2($Html.button,
+                      _L.fromArray([$Html$Attributes.$class("btn btn-default")
+                                   ,$Html$Events.onClick(A2($Signal.send,
+                                   $Santa$Controller$Controller.requestChannel,
+                                   {ctor: "_Tuple2"
+                                   ,_0: "Are you sure? (WARNING: This will delete your current progress!)"
+                                   ,_1: $Santa$Controller$Controller.Reset}))]),
+                      _L.fromArray([$Html.text("Reset Save")]))]))]));
+      }();
+   };
+   _elm.Santa.View.Stats.values = {_op: _op
+                                  ,formatTime: formatTime
+                                  ,display: display};
+   return _elm.Santa.View.Stats.values;
+};
+Elm.Santa = Elm.Santa || {};
+Elm.Santa.View = Elm.Santa.View || {};
+Elm.Santa.View.View = Elm.Santa.View.View || {};
+Elm.Santa.View.View.make = function (_elm) {
+   "use strict";
+   _elm.Santa = _elm.Santa || {};
+   _elm.Santa.View = _elm.Santa.View || {};
+   _elm.Santa.View.View = _elm.Santa.View.View || {};
+   if (_elm.Santa.View.View.values)
+   return _elm.Santa.View.View.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Santa.View.View",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Html$Lazy = Elm.Html.Lazy.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Santa$Common = Elm.Santa.Common.make(_elm),
+   $Santa$Controller$Controller = Elm.Santa.Controller.Controller.make(_elm),
+   $Santa$Model$State = Elm.Santa.Model.State.make(_elm),
+   $Santa$Model$Unlockable = Elm.Santa.Model.Unlockable.make(_elm),
+   $Santa$View$Achievements = Elm.Santa.View.Achievements.make(_elm),
+   $Santa$View$Changelog = Elm.Santa.View.Changelog.make(_elm),
+   $Santa$View$Producer = Elm.Santa.View.Producer.make(_elm),
+   $Santa$View$Product = Elm.Santa.View.Product.make(_elm),
+   $Santa$View$Research = Elm.Santa.View.Research.make(_elm),
+   $Santa$View$Stats = Elm.Santa.View.Stats.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var selectedTabContent = function (state) {
+      return function () {
+         var _v0 = state.selectedTab;
+         switch (_v0.ctor)
          {case "Achievements":
             return A2($Html$Lazy.lazy,
-              displayAchievements,
+              $Santa$View$Achievements.display,
               state.achievements);
             case "Research":
             return A3($Html$Lazy.lazy2,
-              displayUnlockables,
+              $Santa$View$Research.display,
               A2($Basics._op["++"],
               $Santa$Model$Unlockable.availableUnlockables(state.unlockables),
               A2($List.map,
@@ -13439,7 +13967,7 @@ Elm.Santa.View.View.make = function (_elm) {
               $Santa$View$Stats.display,
               state);
             case "Workshop":
-            return A4(displayPurchasableProducers,
+            return A4($Santa$View$Producer.display,
               state.purchaseMultiplier,
               state.producers,
               state.products,
@@ -13447,13 +13975,62 @@ Elm.Santa.View.View.make = function (_elm) {
          return $Html.text("");
       }();
    };
-   var displayDeliveries = F2(function (deliveries,
+   var tabNavigation = function (state) {
+      return function () {
+         var displayTab = function (x) {
+            return function () {
+               var icon = function () {
+                  switch (x.ctor)
+                  {case "Achievements":
+                     return "star";
+                     case "Research": return "book";
+                     case "Stats": return "stats";
+                     case "Workshop": return "cog";}
+                  return "align-left";
+               }();
+               var navigationClass = _U.eq(x,
+               state.selectedTab) ? "active" : "";
+               return A2($Html.li,
+               _L.fromArray([$Html$Attributes.$class(navigationClass)]),
+               _L.fromArray([A2($Html.a,
+               _L.fromArray([$Html$Attributes.href("#")
+                            ,$Html$Events.onClick(A2($Signal.send,
+                            $Santa$Controller$Controller.actionChannel,
+                            $Santa$Controller$Controller.SelectTab(x)))]),
+               _L.fromArray([A2($Html.span,
+                            _L.fromArray([$Html$Attributes.$class(A2($Basics._op["++"],
+                                         "glyphicon glyphicon-",
+                                         icon))
+                                         ,A2($Html$Attributes.stringProperty,
+                                         "aria-hidden",
+                                         "true")
+                                         ,$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                               ,_0: "padding-right"
+                                                                               ,_1: "0.5em"}]))]),
+                            _L.fromArray([]))
+                            ,$Html.text($Basics.toString(x))]))]));
+            }();
+         };
+         return A2($Html.nav,
+         _L.fromArray([$Html$Attributes.$class("navbar navbar-default")
+                      ,A2($Html$Attributes.stringProperty,
+                      "role",
+                      "navigation")]),
+         _L.fromArray([$Html.ul(_L.fromArray([$Html$Attributes.$class("nav navbar-nav")]))(A2($List.map,
+         displayTab,
+         _L.fromArray([$Santa$Model$State.Workshop
+                      ,$Santa$Model$State.Research
+                      ,$Santa$Model$State.Stats
+                      ,$Santa$Model$State.Achievements])))]));
+      }();
+   };
+   var deliveries = F2(function (amount,
    dps) {
       return A2($Html.div,
       _L.fromArray([$Html$Attributes.$class("container text-center")]),
       _L.fromArray([A2($Html.h1,
                    _L.fromArray([]),
-                   _L.fromArray([$Html.text($Basics.toString(deliveries))]))
+                   _L.fromArray([$Html.text($Basics.toString(amount))]))
                    ,A2($Html.p,
                    _L.fromArray([]),
                    _L.fromArray([$Html.text("DELIVERIES MADE")
@@ -13463,7 +14040,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                 $Basics.toString(dps),
                                 "/s)")))]))]));
    });
-   var displayTitle = A2($Html.img,
+   var logo = A2($Html.img,
    _L.fromArray([$Html$Attributes.src("files/logo.png")
                 ,$Html$Attributes.$class("center-block")]),
    _L.fromArray([]));
@@ -13472,11 +14049,11 @@ Elm.Santa.View.View.make = function (_elm) {
       _L.fromArray([]),
       _L.fromArray([A2($Html.header,
                    _L.fromArray([$Html$Attributes.id("header")]),
-                   _L.fromArray([displayTitle]))
+                   _L.fromArray([logo]))
                    ,A2($Html.div,
                    _L.fromArray([$Html$Attributes.$class("jumbotron")]),
                    _L.fromArray([A3($Html$Lazy.lazy2,
-                   displayDeliveries,
+                   deliveries,
                    state.deliveries,
                    state.dps)]))
                    ,A2($Html.div,
@@ -13488,17 +14065,17 @@ Elm.Santa.View.View.make = function (_elm) {
                                 _L.fromArray([A2($Html.div,
                                 _L.fromArray([$Html$Attributes.$class("col-sm-12")]),
                                 _L.fromArray([A2($Html$Lazy.lazy,
-                                primaryResources,
+                                $Santa$View$Product.primaryResources,
                                 state.products)]))]))
                                 ,A2($Html.main$,
                                 _L.fromArray([$Html$Attributes.id("main")
                                              ,$Html$Attributes.$class("row")]),
                                 _L.fromArray([A2($Html.div,
                                              _L.fromArray([$Html$Attributes.$class("col-sm-6")]),
-                                             _L.fromArray([displayNavigation(state)
+                                             _L.fromArray([tabNavigation(state)
                                                           ,A2($Html.div,
                                                           _L.fromArray([$Html$Attributes.$class("panel panel-default")]),
-                                                          _L.fromArray([displaySelectedTab(state)]))]))
+                                                          _L.fromArray([selectedTabContent(state)]))]))
                                              ,A2($Html.div,
                                              _L.fromArray([$Html$Attributes.$class("col-sm-6")]),
                                              _L.fromArray([A2($Html.div,
@@ -13507,7 +14084,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                                                        _L.fromArray([$Html$Attributes.$class("panel-heading")]),
                                                                        _L.fromArray([$Html.text("Ready For Delivery")]))
                                                                        ,A2($Html$Lazy.lazy,
-                                                                       displayReadyList,
+                                                                       $Santa$View$Product.readyList,
                                                                        state.products)]))
                                                           ,A2($Html.div,
                                                           _L.fromArray([$Html$Attributes.$class("panel panel-default")]),
@@ -13515,7 +14092,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                                                        _L.fromArray([$Html$Attributes.$class("panel-heading")]),
                                                                        _L.fromArray([$Html.text("Ready For Wrapping")]))
                                                                        ,A2($Html$Lazy.lazy,
-                                                                       displayUnwrappedList,
+                                                                       $Santa$View$Product.unwrappedList,
                                                                        state.products)]))
                                                           ,A2($Html.div,
                                                           _L.fromArray([$Html$Attributes.$class("panel panel-default")]),
@@ -13523,7 +14100,7 @@ Elm.Santa.View.View.make = function (_elm) {
                                                                        _L.fromArray([$Html$Attributes.$class("panel-heading")]),
                                                                        _L.fromArray([$Html.text("Raw Products")]))
                                                                        ,A2($Html$Lazy.lazy,
-                                                                       displayConsumables,
+                                                                       $Santa$View$Product.consumables,
                                                                        state.products)]))]))]))
                                 ,A2($Html.footer,
                                 _L.fromArray([$Html$Attributes.$class("row")]),
@@ -13552,24 +14129,10 @@ Elm.Santa.View.View.make = function (_elm) {
                                                           _L.fromArray([$Html.text("Bootstrap")]))]))]))]))]))]));
    };
    _elm.Santa.View.View.values = {_op: _op
-                                 ,displayTitle: displayTitle
-                                 ,displayDeliveries: displayDeliveries
-                                 ,displayProducts: displayProducts
-                                 ,displayProductList: displayProductList
-                                 ,displayProduct: displayProduct
-                                 ,displayProducerFunction: displayProducerFunction
-                                 ,displayPurchasableProducers: displayPurchasableProducers
-                                 ,displayPurchasableProducer: displayPurchasableProducer
-                                 ,primaryResources: primaryResources
-                                 ,displayTestButtons: displayTestButtons
-                                 ,displayNavigation: displayNavigation
-                                 ,costTooltip: costTooltip
-                                 ,displayUnlockables: displayUnlockables
-                                 ,displayAchievements: displayAchievements
-                                 ,displaySelectedTab: displaySelectedTab
-                                 ,displayReadyList: displayReadyList
-                                 ,displayUnwrappedList: displayUnwrappedList
-                                 ,displayConsumables: displayConsumables
+                                 ,logo: logo
+                                 ,deliveries: deliveries
+                                 ,tabNavigation: tabNavigation
+                                 ,selectedTabContent: selectedTabContent
                                  ,display: display};
    return _elm.Santa.View.View.values;
 };

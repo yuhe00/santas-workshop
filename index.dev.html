@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="vendor/humane-js-master/themes/jackedup.css">
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="elm.js"></script>
+    <script type="text/javascript" src="debugging-runtime.js"></script>
     <script type="text/javascript" src="debugger.js"></script>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
@@ -18,33 +19,15 @@
     <script type="text/javascript" src="vendor/snow/snow.js"></script>
   </head>
   <body>
-     <!--
-     <script type="text/javascript">
-      var storedState = localStorage.getItem('elm-todo-state');
-      var startingState = storedState ? JSON.parse(storedState) : null;
-      var todomvc = Elm.fullscreen(Elm.Todo, { getStorage: startingState });
-      todomvc.ports.focus.subscribe(function(selector) {
-          setTimeout(function() {
-              var nodes = document.querySelectorAll(selector);
-              if (nodes.length === 1 && document.activeElement !== nodes[0]) {
-                  nodes[0].focus()
-              }
-          }, 50)
-;      });
-      todomvc.ports.setStorage.subscribe(function(state) {
-          localStorage.setItem('elm-todo-state', JSON.stringify(state));
-      }); 
-    </script>
-    -->
     <canvas id="canvas"></canvas>
   </body>
-    <script type="text/javascript">
-      var instance = Elm.debugFullscreen(Elm.Santa, "Santa.elm");
-      instance.ports.showNotification.subscribe(function (message) {
-        if(message.length > 0) {
-          humane.baseCls = 'humane-jackedup';
-          humane.log(message);
-        }
-      });
-    </script>
+  <script type="text/javascript">
+    var instance = Elm.debugFullscreen(Elm.Santa, "Santa.elm");
+    instance.ports.showNotification.subscribe(function (message) {
+      if(message.length > 0) {
+        humane.baseCls = 'humane-jackedup';
+        humane.log(message);
+      }
+    });
+  </script>
 </html>

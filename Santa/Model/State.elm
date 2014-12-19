@@ -12,7 +12,7 @@ import Santa.Model.Stackable (Stackable, stack)
 import Santa.Model.Product as Product
 import Santa.Model.Product (Product)
 import Santa.Model.Producer as Producer
-import Santa.Model.Producer (Producer)
+import Santa.Model.Producer (..)
 import Santa.Model.Unlockable as Unlockable
 import Santa.Model.Unlockable (Unlockable)
 
@@ -191,6 +191,11 @@ otherAchievements =
         |> Descriptive "Produce a PC."
         |> Conditional
             [ Condition (\x -> (Stackable.count Product.computer x.products) >= 1) ]
+    , identity {}
+        |> Named "North Pole, Alaska"
+        |> Descriptive "Construct an Oil Rig."
+        |> Conditional
+            [ Condition (\x -> (Stackable.count { oilRig - cost } x.producers) >= 1) ]
     , identity {}
         |> Named "Dualism"
         |> Descriptive "Produce 2 different types of presents."

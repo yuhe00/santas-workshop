@@ -248,3 +248,26 @@ airplane
         ]
     |> Functional
         [ Deliverer 10 ]
+
+producers : List (Purchasable Producer)
+producers =
+    [ lumberjack
+    , miner
+    , oilRig
+    , santasLittleHelper
+    , woodenToyMaker
+    , metalCarFactory
+    , plasticFactory
+    , batteryFactory
+    , microchipFactory
+    , legoFactory
+    , rcCarFactory
+    , computerFactory
+    , gameConsoleFactory
+    , paperFactory
+    , toyWrapper
+    , advancedToyWrapper
+    , highTechToyWrapper
+    , reindeer
+    , airplane
+    ]

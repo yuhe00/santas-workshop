@@ -26,7 +26,7 @@ wrappable = { wrappable = True, wrapped = False }
 
 wrapped = { consumable | wrapped <- True } |> Named "Wrapped Present"
 spirit = consumable |> Named "Christmas Spirit"
-santasBlessing = consumable |> Named "Santa's Blessing"
+-- santasBlessing = consumable |> Named "Santa's Blessing"
 
 wood = consumable |> Named "Wood"
 metal = consumable |> Named "Metal"
@@ -58,3 +58,15 @@ legos = wrappable |> Named "Lego Set"
 rcCar = wrappable |> Named "RC Car"
 gameConsole = wrappable |> Named "Game Console"
 computer = wrappable |> Named "PC"
+
+presents =
+    [ woodenToy
+    , metalCar
+    , legos
+    , rcCar
+    , gameConsole
+    , computer
+    ]
+
+products : List Product
+products = [ wrapped, spirit ] ++ consumables ++ presents

@@ -16,7 +16,15 @@ type alias Changelog =
 
 changelogs : List Changelog
 changelogs =
-    [ { version = (0, 1, 0)
+    [ { version = (0, 1, 1)
+      , changes =
+            [ "Fixed some layout problems."
+            , "Content update and rebalanced some numbers."
+            , "Game state is now saved between sessions and can be reset."
+            , "Refactored and structured code."
+            ]
+      }
+    , { version = (0, 1, 0)
       , changes = [ "Initial release." ]
       }
     ]

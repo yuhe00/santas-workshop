@@ -32,7 +32,7 @@ type Action
     | Research (Purchasable Unlockable)
     | SetPurchaseMultiplier BigNumber
     | SelectTab State.Tab
-    | Anything (State -> State)
+    | Reset
 
 step : Action -> State -> State
 step action state =
@@ -54,7 +54,7 @@ step action state =
                 Research x -> State.researchUnlockable x state'
                 SetPurchaseMultiplier x -> { state' | purchaseMultiplier <- x }
                 SelectTab x -> { state' | selectedTab <- x }
-                Anything apply -> apply state'
+                Reset -> State.defaultStartState
     in
         State.updateAchievements state''
 
@@ -63,3 +63,6 @@ actionChannel = Signal.channel NoOp
 
 actionSignal : Signal Action
 actionSignal = Signal.subscribe actionChannel
+
+requestChannel : Signal.Channel (String, Action)
+requestChannel = Signal.channel ("", NoOp)

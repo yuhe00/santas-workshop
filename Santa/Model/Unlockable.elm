@@ -195,8 +195,7 @@ fossilFuel
     |> Purchasable 
         [ stack 300 Product.wood
         , stack 300 Product.metal
-        , stack 100 Product.oil
-        , stack 10 Product.spirit
+        , stack 100 Product.spirit
         ]
     |> Upgrade
         [ UnlockProducer Producer.oilRig
@@ -226,27 +225,40 @@ electricity
 fracking
     = identity {}
     |> Named "Hydrofracking"
-    |> researchable (3 * hour)
+    |> researchable (1 * hour)
     |> Purchasable
-        [ stack 3000 Product.wood
-        , stack 3000 Product.metal
-        , stack 3000 Product.oil
-        , stack 1000 Product.spirit
+        [ stack 30000 Product.wood
+        , stack 30000 Product.metal
+        , stack 30000 Product.oil
+        , stack 10000 Product.spirit
         ]
     |> Upgrade
-        [ ProducerPower Producer.oilRig 5
+        [ ProducerPower Producer.oilRig 3
         , Unlock spiritsOfTheEarth
         ]
+
+offshorePlatform
+    = identity {}
+    |> Named "Offshore Platforms"
+    |> researchable (3 * hour)
+    |> Purchasable
+        [ stack 30000 Product.wood
+        , stack 30000 Product.metal
+        , stack 30000 Product.oil
+        , stack 10000 Product.spirit
+        ]
+    |> Upgrade
+        [ ProducerPower Producer.oilRig 5 ]
 
 recycling
     = identity {}
     |> Named "Recycling"
     |> researchable (30 * minute)
     |> Purchasable
-        [ stack 300 Product.wood
-        , stack 300 Product.metal
-        , stack 100 Product.oil
-        , stack 100 Product.spirit
+        [ stack 3000 Product.wood
+        , stack 3000 Product.metal
+        , stack 1000 Product.oil
+        , stack 1000 Product.spirit
         ]
     |> Upgrade
         [ ProducerPower Producer.woodenToyMaker 1
@@ -258,10 +270,10 @@ assemblyLine
     |> Named "Assembly Line"
     |> researchable (3 * hour)
     |> Purchasable
-        [ stack 3000 Product.wood
-        , stack 3000 Product.metal
-        , stack 1000 Product.oil
-        , stack 1000 Product.spirit
+        [ stack 30000 Product.wood
+        , stack 30000 Product.metal
+        , stack 10000 Product.oil
+        , stack 10000 Product.spirit
         ]
     |> Upgrade
         [ ProducerPower Producer.rcCarFactory 1
@@ -272,7 +284,7 @@ plastics
     = identity {}
     |> Named "Plastics"
     |> researchable (1 * hour)
-    |> Purchasable [ stack 300 Product.oil, stack 100 Product.spirit ]
+    |> Purchasable [ stack 5000 Product.oil, stack 5000 Product.spirit ]
     |> Upgrade
         [ UnlockProducer Producer.plasticFactory
         , UnlockProducer Producer.legoFactory
@@ -282,7 +294,7 @@ batteryPower
     = identity {}
     |> Named "Battery Power"
     |> researchable (1 * hour)
-    |> Purchasable [ stack 300 Product.oil, stack 100 Product.spirit ]
+    |> Purchasable [ stack 30000 Product.oil, stack 10000 Product.spirit ]
     |> Upgrade
         [ UnlockProducer Producer.batteryFactory
         , UnlockProducer Producer.rcCarFactory
@@ -292,7 +304,7 @@ microchips
     = identity {}
     |> Named "Integrated Circuits"
     |> researchable (1 * hour)
-    |> Purchasable [ stack 300 Product.oil, stack 100 Product.spirit ]
+    |> Purchasable [ stack 30000 Product.oil, stack 10000 Product.spirit ]
     |> Upgrade
         [ UnlockProducer Producer.microchipFactory
         , UnlockProducer Producer.computerFactory
@@ -305,7 +317,7 @@ robotics
     = identity {}
     |> Named "Robotics"
     |> researchable (1 * hour)
-    |> Purchasable [ stack 300 Product.oil, stack 100 Product.spirit ]
+    |> Purchasable [ stack 30000 Product.oil, stack 10000 Product.spirit ]
     |> Upgrade
         [ ProducerPower Producer.microchipFactory 1
         , Unlock cyberneticImplants
@@ -338,14 +350,18 @@ manualLabor
     = identity {}
     |> Named "Manual Labor"
     |> researchable (30 * minute)
-    |> Purchasable [ stack 300 Product.spirit ]
+    |> Purchasable [ stack 1000 Product.spirit ]
     |> Upgrade [ ClickPower 3 ]
 
 chainsaws
     = identity {}
     |> Named "Chainsaws"
     |> researchable (30 * minute)
-    |> Purchasable [ stack 150 Product.metal, stack 150 Product.oil, stack 100 Product.spirit ]
+    |> Purchasable
+        [ stack 1500 Product.metal
+        , stack 1500 Product.oil
+        , stack 1000 Product.spirit
+        ]
     |> Upgrade
         [ ProducerPower Producer.lumberjack 3
         , Unlock rainForestDeregulation
@@ -363,7 +379,7 @@ heavyMachinery
     = identity {}
     |> Named "Heavy Machinery"
     |> researchable (3 * minute)
-    |> Purchasable [ stack 30 Product.metal, stack 10 Product.spirit ]
+    |> Purchasable [ stack 300 Product.metal, stack 100 Product.spirit ]
     |> Upgrade
         [ ProducerPower Producer.miner 1
         , Unlock goldRush
@@ -373,7 +389,7 @@ goldRush
     = identity {}
     |> Named "Gold Rush!"
     |> researchable (30 * minute)
-    |> Purchasable [ stack 300 Product.metal, stack 100 Product.spirit ]
+    |> Purchasable [ stack 3000 Product.metal, stack 1000 Product.spirit ]
     |> Upgrade
         [ ProducerPower Producer.miner 3
         , Unlock nuclearPoweredDrills
@@ -383,7 +399,7 @@ nuclearPoweredDrills
     = identity {}
     |> Named "Nuclear-powered Drills"
     |> researchable (3 * hour)
-    |> Purchasable [ stack 3000 Product.metal, stack 1000 Product.spirit ]
+    |> Purchasable [ stack 30000 Product.metal, stack 10000 Product.spirit ]
     |> Upgrade
         [ ProducerPower Producer.miner 5 ]
 
@@ -412,7 +428,7 @@ occultism
     = identity {}
     |> Named "Occultism"
     |> researchable (30 * minute)
-    |> Purchasable [ stack 500 Product.spirit ]
+    |> Purchasable [ stack 5000 Product.spirit ]
     |> Upgrade
         [ ClickPower 3
         , ResearchPower 0.2
@@ -424,7 +440,7 @@ telepathy
     = identity {}
     |> Named "Telepathy"
     |> researchable (3 * hour)
-    |> Purchasable [ stack 5000 Product.spirit ]
+    |> Purchasable [ stack 50000 Product.spirit ]
     |> Upgrade [ ClickPower 5 ]
 
 papermaking
@@ -456,9 +472,9 @@ redNosePaint
     |> Named "Red Nose-paint"
     |> researchable (10 * minute)
     |> Purchasable
-        [ stack 100 Product.wood
-        , stack 100 Product.metal
-        , stack 100 Product.spirit
+        [ stack 1000 Product.wood
+        , stack 1000 Product.metal
+        , stack 1000 Product.spirit
         ]
     |> Upgrade
         [ ProducerPower Producer.reindeer 1 ]
@@ -468,10 +484,10 @@ aviation
     |> Named "Aviation"
     |> researchable (3 * hour)
     |> Purchasable
-        [ stack 300 Product.wood
-        , stack 300 Product.metal
-        , stack 300 Product.oil
-        , stack 100 Product.spirit
+        [ stack 3000 Product.wood
+        , stack 3000 Product.metal
+        , stack 3000 Product.oil
+        , stack 1000 Product.spirit
         ]
     |> Upgrade
         [ UnlockProducer Producer.airplane
@@ -483,10 +499,10 @@ globalPositioningSystem
     |> Named "Global Positioning System"
     |> researchable (24 * hour)
     |> Purchasable
-        [ stack 3000 Product.wood
-        , stack 3000 Product.metal
-        , stack 3000 Product.oil
-        , stack 1000 Product.spirit
+        [ stack 30000 Product.wood
+        , stack 30000 Product.metal
+        , stack 30000 Product.oil
+        , stack 10000 Product.spirit
         ]
     |> Upgrade
         [ ProducerPower Producer.reindeer 2
@@ -505,12 +521,58 @@ spiritsOfTheEarth
     = identity {}
     |> Named "Spirits of the Earth"
     |> researchable (30 * minute)
-    |> Purchasable [ stack 1000 Product.metal ]
+    |> Purchasable [ stack 10000 Product.metal ]
     |> Upgrade [ SpiritPower 3 ]
 
 spiritsOfOurAncestors
     = identity {}
     |> Named "Spirits of our Ancestors"
     |> researchable (3 * hour)
-    |> Purchasable [ stack 10000 Product.oil ]
+    |> Purchasable [ stack 100000 Product.spirit ]
     |> Upgrade [ SpiritPower 5 ]
+
+costTier : Int -> List Product -> List (Stackable Product)
+costTier tier products =
+    let t = length products
+        b = 10^(tier + 1)
+    in
+        if | tier == 0 -> map (stack <| b // t) products
+           | otherwise -> map (stack 1) products
+
+unlockables : List (Purchasable Unlockable)
+unlockables =
+    [ forestry
+    , mining
+    , manufacturing
+    , scientificMethod
+    , fossilFuel
+    , electricity
+    , fracking
+    , offshorePlatform
+    , recycling
+    , assemblyLine
+    , plastics
+    , batteryPower
+    , microchips
+    , robotics
+    , cyberneticImplants
+    , bodyBuilding
+    , manualLabor
+    , chainsaws
+    , rainForestDeregulation
+    , heavyMachinery
+    , goldRush
+    , nuclearPoweredDrills
+    , woodworking
+    , naturalOrder
+    , occultism
+    , telepathy
+    , papermaking
+    , reindeerFarm
+    , redNosePaint
+    , aviation
+    , globalPositioningSystem
+    , spiritsOfTheForest
+    , spiritsOfTheEarth
+    , spiritsOfOurAncestors
+    ]
